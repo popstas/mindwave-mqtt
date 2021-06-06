@@ -1,0 +1,92 @@
+body {
+  background: #333;
+  color: #ccc;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+form {
+  margin-top: 15px;
+  margin-bottom: 30px;
+}
+
+input {
+  background: #444;
+  color: #ccc;
+}
+
+.main-value { 
+  font-size: 20px;
+  /* margin-bottom: 30px; */
+
+}
+.main-value .label {
+  margin-bottom: -40px;
+  display: block;
+}
+/* @media(max-width: 800px) {
+  .main-value .label {
+    margin-bottom: -15px;
+  }
+} */
+.main-value .label {
+  margin-bottom: -40px;
+  display: block;
+}
+.main-value .value {
+  display: block;
+  font-size: 30vh;
+}
+@media (min-width: 1200px) {
+  .main-value {
+    float: left;
+    width: 50%;
+  }
+}
+
+button {
+  margin-top: 10px;
+  font-size: 30px;
+  background: none;
+  color: #ccc;
+}
+
+table { 
+  margin: 0 auto;
+  text-align: left;
+}
+
+#app {
+  text-align: center;
+  margin-top: 30px;
+}
+.poor-signal {
+  opacity: 0.5;
+}
+[v-cloak] {
+  display: none;
+}
+
+/* Chart */
+svg {
+  max-width: 100%;
+}
+
+/* Stats */
+.stats-row {
+  margin-bottom: 15px;
+}
+.stats-value .percent {
+  display: inline-block;
+  min-width: 45px;
+}
+
+@media (min-width: 1000px) {
+  .stats-row {
+    float: left;
+    width: 50%;
+  }
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meditation</title>
+  <script src="https://unpkg.com/mqtt@3.0.0/dist/mqtt.min.js"></script>
+  <script src="https://unpkg.com/base-64/base64.js"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
+  <script src="https://unpkg.com/vuex-persistedstate@4.0.0-beta.3/dist/vuex-persistedstate.umd.js"></script>
+  <script src="script.js?v=18"></script>
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  
+  <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation == 0 }">
+    <div class="main-values">
+      <div v-if="!signal" class="main-value">
+        <span class="label">Meditation:</span>
+        <span class="value">{{ meditation }}</span>
+      </div>
+      <div v-if="!signal" class="main-value">
+        <span class="label">Attention:</span>
+        <span class="value">{{ attention }}</span>
+      </div>
+      <div v-if="signal" class="main-value">
+        <span class="label">Signal loses:</span>
+        <span class="value">{{ Math.min(signal, 100) }}</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <table class="stats" v-if="thresholdsData.meditation">
+        <tr v-if="thresholdsData.meditation.average" class="stats-value">
+          <td class="label">Meditation avg:</td>
+          <td class="value">{{ thresholdsData.meditation.average }}%</td>
+        </tr>
+
+        <tr class="stats-value" v-for="(th, val) in thresholdsData.meditation.thresholds" :key="val">
+          <td class="label">{{ val }}%:</td>
+          <td class="value">
+            {{ mmss(th.total) }}
+            <span class="percent" v-if="th.total">({{ timePercent(th.total) }})</span>
+            <span class="max" v-if="th.maxTime">, max: {{ mmss(th.maxTime) }}</span>
+            <span class="loses" v-if="th.loses">, count: {{ th.loses }}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="stats-row">
+      <table class="stats" v-if="thresholdsData.attention">
+        <tr v-if="thresholdsData.attention.average" class="stats-value">
+          <td class="label">Attention avg:</td>
+          <td class="value">{{ thresholdsData.attention.average }}%</td>
+        </tr>
+
+        <tr class="stats-value" v-for="(th, val) in thresholdsData.attention.thresholds" :key="'attention'+val">
+          <td class="label">{{ val }}%:</td>
+          <td class="value">
+            {{ mmss(th.total) }}
+            <span class="percent" v-if="th.total">({{ timePercent(th.total) }})</span>
+            <span class="max" v-if="th.maxTime">, max: {{ mmss(th.maxTime) }}</span>
+            <span class="loses" v-if="th.loses">, count: {{ th.loses }}</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div v-if="meditationTime" class="meditation-time">
+      <span class="label">Session time:</span>
+      <span class="value">{{ mmss(meditationTime) }}</span>
+    </div>
+
+    <div ref="chart">
+      <svg ref="svg"  width="1000" height="300"></svg>
+    </div>
+
+    <button @click="startMeditation">{{ state == 'started' ? 'Stop' : 'Start' }}</button>
+
+    <form>
+      <table class="settings">
+        <tr class="form-row">
+          <td><label>Meditation threshold:</label></td>
+          <td><input size="2" v-model="meditationFrom" type="text" /></td>
+        </tr>
+        <tr class="form-row">
+          <td><label for="isSound">Sound:</label></td>
+          <td>
+            <input id="isSound" type="checkbox" v-model="isSound" />
+            <!-- <label>Частота, Гц:</label> <input size="2" v-model="soundFrequency" type="text" /> -->
+          </td>
+        </tr>
+        <tr class="form-row">
+          <td><label for="halfChart">Chart from 70%:</label></td>
+          <td><input id="halfChart" type="checkbox" v-model="halfChart" /></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</body>
+</html>
