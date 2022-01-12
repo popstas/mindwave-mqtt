@@ -17,6 +17,7 @@
 <body>
   
   <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation === 0, inited: this.state !== 'idle', [state]: true }">
+    <!-- Current Meditation-->
     <div class="main-values">
       <div v-if="!signal && meditation" class="main-value">
         <span class="label">Meditation:</span>
