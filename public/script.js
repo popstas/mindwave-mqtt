@@ -1,5 +1,4 @@
 async function start() {
-
   const config = {
     mindwaveUrl: 'http://localhost:9301/mindwave',
     medLevels: {
@@ -20,17 +19,17 @@ async function start() {
       100: 0,
     },
     fromDay: '', // 2021-09-20 начало 5-минутных медитаций
-  }
+  };
 
   const nosleep = new NoSleep();
 
   // mutations с записью тупо значения в state
   const mutationFabric = (names) => {
     const mutations = {};
-    names.map(name => {
+    names.map((name) => {
       mutations[name] = (state, val) => {
         state[name] = val;
-      }
+      };
     });
     return mutations;
   };
@@ -48,9 +47,11 @@ async function start() {
 
   const store = new Vuex.Store({
     // ...
-    plugins: [createPersistedState({
-      paths: persistentFields,
-    })],
+    plugins: [
+      createPersistedState({
+        paths: persistentFields,
+      }),
+    ],
     state: {
       isSound: true,
       halfChartTop: false,
@@ -63,17 +64,21 @@ async function start() {
     },
     mutations: {
       ...mutationFabric(persistentFields),
-    }
+    },
   });
 
   // создаёт computed с геттером и сеттером из vuex
   const computedFabric = (names) => {
     const computed = {};
-    names.map(name => {
+    names.map((name) => {
       computed[name] = {
-        get() { return store.state[name]; },
-        set(val) { store.commit(name, val); }
-      }
+        get() {
+          return store.state[name];
+        },
+        set(val) {
+          store.commit(name, val);
+        },
+      };
     });
 
     return computed;
@@ -140,9 +145,9 @@ async function start() {
         let minDate, maxDate;
 
         // собирает days
-        this.meditations.forEach(med => {
-          const day = this.day(med.meditationStart - (6 * 3600 * 1000)); // до 6 утра считаем за вчера
-          const date = new Date(day).getTime()
+        this.meditations.forEach((med) => {
+          const day = this.day(med.meditationStart - 6 * 3600 * 1000); // до 6 утра считаем за вчера
+          const date = new Date(day).getTime();
           const ds = days[day] || {
             date: date,
             count: 0,
@@ -157,7 +162,7 @@ async function start() {
             med100avg: 0,
             medAvg: 0,
             meditation: 0,
-          }
+          };
 
           // min max
           if (!minDate || minDate > date) minDate = date;
@@ -184,7 +189,7 @@ async function start() {
             days[day] = {
               date: date,
               time: 0,
-            }
+            };
           }
         }
 
@@ -200,17 +205,18 @@ async function start() {
           for (let t of [70, 80, 90, 100]) {
             const keyTotal = 'med' + t + 'total';
             const keyAvg = 'med' + t + 'avg';
-            ds[keyAvg] = ds[keyTotal] / ds.time * 100;
+            ds[keyAvg] = (ds[keyTotal] / ds.time) * 100;
             if (isNaN(ds[keyAvg])) ds[keyAvg] = 0;
           }
           ds.day = day;
 
           // валидация
           ds.isMeditationHigh = ds.med70avg >= config.medLevels.high ? 100 : 0;
-          ds.isMeditationMed = ds.med70avg >= config.medLevels.low && ds.med70avg < config.medLevels.high ? 100 : 0;
+          ds.isMeditationMed =
+            ds.med70avg >= config.medLevels.low && ds.med70avg < config.medLevels.high ? 100 : 0;
           ds.isMeditationLow = ds.med70avg < config.medLevels.low && ds.med70avg > 0 ? 100 : 0;
           ds.med70totalPoints = ds.med70total / 15; // коэф. чтобы показать кол-во времени в медитации по дням
-          ds.med70totalMins = Math.round(ds.med70total / 60 * 10) / 10;
+          ds.med70totalMins = Math.round((ds.med70total / 60) * 10) / 10;
           if (isNaN(ds.med70totalMins)) ds.med70totalMins = 0;
 
           ds.mins = Math.round(ds.time / 60);
@@ -227,13 +233,13 @@ async function start() {
           if (a.date < b.date) return -1;
           return 0;
         });
-      }
+      },
     },
 
     watch: {
       attention(val) {
         if (!this.meditationStart || this.state === 'stop') return;
-        this.processThresholds({field: 'attention', value: val});
+        this.processThresholds({ field: 'attention', value: val });
       },
 
       halfChartTop(val) {
@@ -269,14 +275,14 @@ async function start() {
         // started meditation
         if (!this.meditationStart || this.state === 'stop') return;
 
-        this.processThresholds({field: 'meditation', value: val});
+        this.processThresholds({ field: 'meditation', value: val });
 
         // время сессии
         this.meditationTime = Math.round((Date.now() - this.meditationStart) / 1000);
 
         // среднее, только при хорошем сигнале
         // здесь по идее всегда сигнал 0
-        if (this.signal === 0 && this.meditation > 0){
+        if (this.signal === 0 && this.meditation > 0) {
           this.tick++;
           this.totalSum += val;
           this.addHistory();
@@ -290,7 +296,7 @@ async function start() {
           const f = config.thresholdsFrequency[threshold];
           if (val > threshold) freq = f;
         }
-        // console.log('med freq: ', freq); 
+        // console.log('med freq: ', freq);
         this.oscillator.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
 
         // mute on bad signal
@@ -300,7 +306,6 @@ async function start() {
           this.pause();
         }
 
-
         // first signal, actually begin
         if (this.tick === 1) {
           this.meditationStart = Date.now();
@@ -308,7 +313,6 @@ async function start() {
           // begin signal
           this.beep(freq);
         }
-
 
         // stop after max time
         if (this.meditationTimeMax > 0 && this.meditationTime >= this.meditationTimeMax) {
@@ -326,7 +330,6 @@ async function start() {
           else this.oscillator.disconnect(this.audioCtx.destination);
         }
       },
-
     },
 
     mounted() {
@@ -338,7 +341,7 @@ async function start() {
         const response = await fetch(config.mindwaveUrl, {
           headers: headers,
         });
-        
+
         const data = await response.json();
 
         for (let name in data) {
@@ -358,8 +361,7 @@ async function start() {
     },
 
     methods: {
-
-      beep(freqAfter, freq=1000, time=50) {
+      beep(freqAfter, freq = 1000, time = 50) {
         this.oscillator.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
         setTimeout(() => {
           this.oscillator.frequency.setValueAtTime(freqAfter, this.audioCtx.currentTime);
@@ -367,7 +369,7 @@ async function start() {
       },
 
       historyToChartData(history) {
-        return history.map(elem => {
+        return history.map((elem) => {
           // расшифровываем сокращённый json
           const med = elem.m || elem.values.mediation;
           const att = elem.a || elem.values.attention;
@@ -392,7 +394,7 @@ async function start() {
           };
         });
       },
-      
+
       async audioInit() {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         this.oscillator = this.audioCtx.createOscillator();
@@ -450,9 +452,9 @@ async function start() {
           thresholdsData: this.thresholdsData,
           meditationStart: this.meditationStart,
           meditationTime: this.meditationTime,
-        }
+        };
 
-        const meds = [...this.meditations,  med];
+        const meds = [...this.meditations, med];
         const sorted = meds.sort((b, a) => {
           if (a.meditationStart > b.meditationStart) return 1;
           if (a.meditationStart < b.meditationStart) return -1;
@@ -460,7 +462,7 @@ async function start() {
         });
         try {
           this.meditations = sorted;
-        } catch(e) {
+        } catch (e) {
           alert('Not enough space for save meditation!');
         }
       },
@@ -485,10 +487,10 @@ async function start() {
       },
 
       removeMeditation(med) {
-        this.meditations = this.meditations.filter(m => m.name !== med.name);
+        this.meditations = this.meditations.filter((m) => m.name !== med.name);
       },
 
-      processThresholds({field, value}) {
+      processThresholds({ field, value }) {
         if (!this.thresholdsData[field]) {
           this.thresholdsData[field] = {
             totalSum: 0,
@@ -506,14 +508,14 @@ async function start() {
               loses: 0,
             };
           }
-          
+
           const th = this.thresholdsData[field].thresholds[threshold];
 
           // start
           if (value >= threshold) {
             if (!th.start) {
               console.log(`start meditation ${threshold}%`);
-              this.thresholdsData[field].thresholds[threshold].start = Date.now()
+              this.thresholdsData[field].thresholds[threshold].start = Date.now();
             }
           }
 
@@ -540,14 +542,16 @@ async function start() {
 
         this.thresholdsData[field].tick++;
         this.thresholdsData[field].totalSum += value;
-        this.thresholdsData[field].average = Math.round(this.thresholdsData[field].totalSum / this.thresholdsData[field].tick);
+        this.thresholdsData[field].average = Math.round(
+          this.thresholdsData[field].totalSum / this.thresholdsData[field].tick
+        );
       },
 
       mmss(s) {
         const sec = String(s % 60).padStart(2, '0');
         const min = String(Math.floor(s / 60)).padStart(2, ' ');
         return `${min}:${sec}`;
-      }, 
+      },
 
       day(ts) {
         if (!ts) return '';
@@ -556,7 +560,7 @@ async function start() {
       },
 
       timePercent(time) {
-        const val = Math.round(time / this.meditationTime * 100);
+        const val = Math.round((time / this.meditationTime) * 100);
         return `${val}%`;
       },
 
@@ -565,16 +569,16 @@ async function start() {
           d: Date.now(),
           m: this.meditation,
           a: this.attention,
-        }
+        };
         this.history.push(data);
       },
 
       clientWidth() {
-        return (window.innerWidth > 0) ? window.innerWidth : screen.width;
+        return window.innerWidth > 0 ? window.innerWidth : screen.width;
       },
 
       clientHeight() {
-        return (window.innerHeight > 0) ? window.innerHeight : screen.height;
+        return window.innerHeight > 0 ? window.innerHeight : screen.height;
       },
 
       percentClass(val, type) {
@@ -602,7 +606,7 @@ async function start() {
       drawChartMeditation(svgId, chartData) {
         const width = this.clientWidth(); // 100% ширины
         const height = Math.max(this.clientHeight() / 3, 300); // 300 точек или 1/3 высоты экрана: что больше
-        const margin = ({top: 20, right: 30, bottom: 30, left: 40});
+        const margin = { top: 20, right: 30, bottom: 30, left: 40 };
         this.$refs[svgId].setAttribute('width', width);
         this.$refs[svgId].setAttribute('height', height);
         // console.log('this.chartData.length: ', this.chartData.length);
@@ -611,179 +615,205 @@ async function start() {
         const chartTo = this.halfChartBottom ? 30 : 100;
 
         const lineByIndicator = (name) => {
-          return d3.line()
-            .defined(d => !isNaN(d[name]))
-            .x(d => x(d.date))
-            .y(d => y(d[name]))
-            .curve(d3.curveStep)
+          return d3
+            .line()
+            .defined((d) => !isNaN(d[name]))
+            .x((d) => x(d.date))
+            .y((d) => y(d[name]))
+            .curve(d3.curveStep);
         };
 
         const areaByIndicator = (name) => {
-          return d3.area()
-            .defined(d => !isNaN(d[name]))
-            .x(d => x(d.date))
-            .y0(height)
-            // .y1(d => y(d[name]))
-            .y1(d => y(d[name]))
-            .curve(d3.curveStep)
+          return (
+            d3
+              .area()
+              .defined((d) => !isNaN(d[name]))
+              .x((d) => x(d.date))
+              .y0(height)
+              // .y1(d => y(d[name]))
+              .y1((d) => y(d[name]))
+              .curve(d3.curveStep)
+          );
         };
 
-        const lineThreshold = ({name, value}) => {
-          return d3.line()
-            .defined(d => !isNaN(d.meditation))
-            .x(d => x(d.date))
-            .y(d => y(value));
+        const lineThreshold = ({ name, value }) => {
+          return d3
+            .line()
+            .defined((d) => !isNaN(d.meditation))
+            .x((d) => x(d.date))
+            .y((d) => y(value));
         };
 
-        const xAxis = g => g
-          .attr("transform", `translate(0,${height - margin.bottom})`)
-          .call(
-            d3.axisBottom(x)
+        const xAxis = (g) =>
+          g.attr('transform', `translate(0,${height - margin.bottom})`).call(
+            d3
+              .axisBottom(x)
               .ticks(width / 80)
               .tickSizeOuter(0)
               .tickFormat(d3.timeFormat('%M:%S'))
-          )
+          );
 
-        const yAxis = g => g
-          .attr("transform", `translate(${margin.left},0)`)
-          .call(d3.axisLeft(y))
-          .call(g => g.select(".domain").remove())
-          .call(g => g.select(".tick:last-of-type text").clone()
-            .attr("x", 3)
-            .attr("text-anchor", "start")
-            .attr("font-weight", "bold")
+        const yAxis = (g) =>
+          g
+            .attr('transform', `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y))
+            .call((g) => g.select('.domain').remove())
+            .call((g) =>
+              g
+                .select('.tick:last-of-type text')
+                .clone()
+                .attr('x', 3)
+                .attr('text-anchor', 'start')
+                .attr('font-weight', 'bold')
             );
 
-        const x = d3.scaleUtc()
-          .domain(d3.extent(chartData, d => d.date))
+        const x = d3
+          .scaleUtc()
+          .domain(d3.extent(chartData, (d) => d.date))
           .range([margin.left, width - margin.right]);
 
-        const y = d3.scaleLinear()
-          .domain([chartFrom, chartTo]).nice()
+        const y = d3
+          .scaleLinear()
+          .domain([chartFrom, chartTo])
+          .nice()
           .range([height - margin.bottom, margin.top]);
 
         const svg = d3.select('#' + svgId);
-        svg.selectAll('*').remove()
+        svg.selectAll('*').remove();
 
-        svg.attr("viewBox", [0, 0, width, height]);
+        svg.attr('viewBox', [0, 0, width, height]);
 
-        svg.append("g")
-          .call(xAxis);
-        svg.append("g")
-          .call(yAxis);
+        svg.append('g').call(xAxis);
+        svg.append('g').call(yAxis);
 
         // meditation
-        svg.append("path")
-          .datum(chartData) 
-          .attr("fill", "steelblue")
-          .attr("stroke", "steelblue")
-          .attr("stroke-width", 1.5)
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("d", areaByIndicator('meditation'))
+        svg
+          .append('path')
+          .datum(chartData)
+          .attr('fill', 'steelblue')
+          .attr('stroke', 'steelblue')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', areaByIndicator('meditation'));
 
         // attention
-        svg.append("path")
+        svg
+          .append('path')
           .datum(chartData)
-          .attr("fill", "none")
-          .attr("stroke", "#999")
-          .attr("stroke-width", 1.5)
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("d", lineByIndicator('attention'))
+          .attr('fill', 'none')
+          .attr('stroke', '#999')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', lineByIndicator('attention'));
 
         // isMeditationHigh
         if (this.meditationZones) {
-          svg.append("path")
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationHigh'))
-          svg.append("path")
+            .attr('fill', 'green')
+            .attr('stroke', 'green')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationHigh'));
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditation80'))
-          svg.append("path")
+            .attr('fill', 'green')
+            .attr('stroke', 'green')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditation80'));
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditation90'))
-          svg.append("path")
+            .attr('fill', 'green')
+            .attr('stroke', 'green')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditation90'));
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditation100'))
+            .attr('fill', 'green')
+            .attr('stroke', 'green')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditation100'));
 
           // isMeditationMed
-          svg.append("path")
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "yellow")
-            .attr("stroke", "yellow")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationMed'))
+            .attr('fill', 'yellow')
+            .attr('stroke', 'yellow')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationMed'));
 
           // isMeditationMed
-          svg.append("path")
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "red")
-            .attr("stroke", "red")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationLow'))
+            .attr('fill', 'red')
+            .attr('stroke', 'red')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationLow'));
 
           // minute checkpoint TODO:
-          svg.append("path")
+          svg
+            .append('path')
             .datum(chartData)
-            .attr("fill", "white")
-            .attr("stroke", "white")
-            .attr("opacity", "0.9")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMinute'))
+            .attr('fill', 'white')
+            .attr('stroke', 'white')
+            .attr('opacity', '0.9')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMinute'));
         }
 
         // this.meditationFrom
-        svg.append("path")
+        svg
+          .append('path')
           .datum(chartData)
-          .attr("stroke", "green")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: this.meditationFrom + '%', value: this.meditationFrom}))
+          .attr('stroke', 'green')
+          .style('stroke-dasharray', '5, 5')
+          .attr(
+            'd',
+            lineThreshold({ name: this.meditationFrom + '%', value: this.meditationFrom })
+          );
 
         // 80%
-        svg.append("path")
+        svg
+          .append('path')
           .datum(chartData)
-          .attr("stroke", "green")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: '80%', value: 80}))
+          .attr('stroke', 'green')
+          .style('stroke-dasharray', '5, 5')
+          .attr('d', lineThreshold({ name: '80%', value: 80 }));
 
         // 90%
-        svg.append("path")
+        svg
+          .append('path')
           .datum(chartData)
-          .attr("stroke", "green")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: '90%', value: 90}))
+          .attr('stroke', 'green')
+          .style('stroke-dasharray', '5, 5')
+          .attr('d', lineThreshold({ name: '90%', value: 90 }));
 
         // 100%
-        svg.append("path")
+        svg
+          .append('path')
           .datum(chartData)
-          .attr("stroke", "green")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: '100%', value: 100}))
+          .attr('stroke', 'green')
+          .style('stroke-dasharray', '5, 5')
+          .attr('d', lineThreshold({ name: '100%', value: 100 }));
       },
 
       drawChartHistory() {
         const width = this.clientWidth(); // 100% ширины
         const height = Math.max(this.clientHeight() / 3, 300); // 300 точек или 1/3 высоты экрана: что больше
-        const margin = ({top: 20, right: 30, bottom: 30, left: 40});
+        const margin = { top: 20, right: 30, bottom: 30, left: 40 };
         this.$refs.svgHistory.setAttribute('width', width);
         this.$refs.svgHistory.setAttribute('height', height);
         // console.log('this.meditationsStat.length: ', this.meditationsStat.length);
@@ -792,76 +822,87 @@ async function start() {
         const chartTo = 100;
 
         const lineByIndicator = (name) => {
-          return d3.line()
-            .defined(d => !isNaN(d[name]))
-            .x(d => x(d.date))
-            .y(d => y(d[name]))
-            .curve(d3.curveStep)
+          return d3
+            .line()
+            .defined((d) => !isNaN(d[name]))
+            .x((d) => x(d.date))
+            .y((d) => y(d[name]))
+            .curve(d3.curveStep);
         };
 
         const areaByIndicator = (name) => {
-          return d3.area()
-            .defined(d => !isNaN(d[name]))
-            .x(d => x(d.date))
-            .y0(height)
-            // .y1(d => y(d[name]))
-            .y1(d => y(d[name]))
-            .curve(d3.curveStep)
+          return (
+            d3
+              .area()
+              .defined((d) => !isNaN(d[name]))
+              .x((d) => x(d.date))
+              .y0(height)
+              // .y1(d => y(d[name]))
+              .y1((d) => y(d[name]))
+              .curve(d3.curveStep)
+          );
         };
 
-        const lineThreshold = ({name, value}) => {
-          return d3.line()
-            .defined(d => !isNaN(d.meditation))
-            .x(d => x(d.date))
-            .y(d => y(value));
+        const lineThreshold = ({ name, value }) => {
+          return d3
+            .line()
+            .defined((d) => !isNaN(d.meditation))
+            .x((d) => x(d.date))
+            .y((d) => y(value));
         };
 
-        const xAxis = g => g
-          .attr("transform", `translate(0,${height - margin.bottom})`)
-          .call(
-            d3.axisBottom(x)
+        const xAxis = (g) =>
+          g.attr('transform', `translate(0,${height - margin.bottom})`).call(
+            d3
+              .axisBottom(x)
               .ticks(width / 80)
               .tickSizeOuter(0)
               .tickFormat(d3.timeFormat('%M:%S'))
-          )
+          );
 
-        const yAxis = g => g
-          .attr("transform", `translate(${margin.left},0)`)
-          .call(d3.axisLeft(y))
-          .call(g => g.select(".domain").remove())
-          .call(g => g.select(".tick:last-of-type text").clone()
-            .attr("x", 3)
-            .attr("text-anchor", "start")
-            .attr("font-weight", "bold")
+        const yAxis = (g) =>
+          g
+            .attr('transform', `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y))
+            .call((g) => g.select('.domain').remove())
+            .call((g) =>
+              g
+                .select('.tick:last-of-type text')
+                .clone()
+                .attr('x', 3)
+                .attr('text-anchor', 'start')
+                .attr('font-weight', 'bold')
             );
 
-        const x = d3.scaleUtc()
-          .domain(d3.extent(this.meditationsStat, d => d.date))
+        const x = d3
+          .scaleUtc()
+          .domain(d3.extent(this.meditationsStat, (d) => d.date))
           .range([margin.left, width - margin.right]);
 
-        const y = d3.scaleLinear()
-          .domain([chartFrom, chartTo]).nice()
+        const y = d3
+          .scaleLinear()
+          .domain([chartFrom, chartTo])
+          .nice()
           .range([height - margin.bottom, margin.top]);
 
-        const svg = d3.select('#svgHistory')
-        svg.selectAll('*').remove()
+        const svg = d3.select('#svgHistory');
+        svg.selectAll('*').remove();
 
-        svg.attr("viewBox", [0, 0, width, height]);
+        svg.attr('viewBox', [0, 0, width, height]);
 
-        svg.append("g")
-          .call(xAxis);
-        svg.append("g")
-          .call(yAxis);
+        svg.append('g').call(xAxis);
+        svg.append('g').call(yAxis);
 
         // med70total
-        svg.append("path")
-          .datum(this.meditationsStat) 
-          .attr("fill", "steelblue")
-          .attr("stroke", "steelblue")
-          .attr("stroke-width", 1.5)
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("d", areaByIndicator('med70totalPoints'))
+        svg
+          .append('path')
+          .datum(this.meditationsStat)
+          .attr('fill', 'steelblue')
+          .attr('stroke', 'steelblue')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', areaByIndicator('med70totalPoints'));
 
         // med80avg
         /* svg.append("path")
@@ -884,57 +925,69 @@ async function start() {
           .attr("d", lineByIndicator('med90avg')) */
 
         // mins
-        svg.append("path")
+        svg
+          .append('path')
           .datum(this.meditationsStat)
-          .attr("fill", "none")
-          .attr("stroke", "white")
-          .attr("stroke-width", 1.5)
+          .attr('fill', 'none')
+          .attr('stroke', 'white')
+          .attr('stroke-width', 1.5)
           // .attr("stroke-linejoin", "round")
           // .attr("stroke-linecap", "round")
-          .attr("d", lineByIndicator('mins'))
+          .attr('d', lineByIndicator('mins'));
 
         // isMeditationHigh
         if (this.meditationZones) {
-          svg.append("path")
+          svg
+            .append('path')
             .datum(this.meditationsStat)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationHigh'))
+            .attr('fill', 'green')
+            .attr('stroke', 'green')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationHigh'));
 
           // isMeditationMed
-          svg.append("path")
+          svg
+            .append('path')
             .datum(this.meditationsStat)
-            .attr("fill", "yellow")
-            .attr("stroke", "yellow")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationMed'))
+            .attr('fill', 'yellow')
+            .attr('stroke', 'yellow')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationMed'));
 
           // isMeditationMed
-          svg.append("path")
+          svg
+            .append('path')
             .datum(this.meditationsStat)
-            .attr("fill", "red")
-            .attr("stroke", "red")
-            .attr("opacity", "0.3")
-            .attr("stroke-width", 0)
-            .attr("d", areaByIndicator('isMeditationLow'))
+            .attr('fill', 'red')
+            .attr('stroke', 'red')
+            .attr('opacity', '0.3')
+            .attr('stroke-width', 0)
+            .attr('d', areaByIndicator('isMeditationLow'));
         }
 
         // 50%
-        svg.append("path")
+        svg
+          .append('path')
           .datum(this.meditationsStat)
-          .attr("stroke", "yellow")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: `${config.medLevels.high}%`, value: config.medLevels.high}))
+          .attr('stroke', 'yellow')
+          .style('stroke-dasharray', '5, 5')
+          .attr(
+            'd',
+            lineThreshold({ name: `${config.medLevels.high}%`, value: config.medLevels.high })
+          );
 
         // 40%
-        svg.append("path")
+        svg
+          .append('path')
           .datum(this.meditationsStat)
-          .attr("stroke", "red")
-          .style("stroke-dasharray", ("5, 5"))
-          .attr("d", lineThreshold({name: `${config.medLevels.low}%`, value: config.medLevels.low}))
+          .attr('stroke', 'red')
+          .style('stroke-dasharray', '5, 5')
+          .attr(
+            'd',
+            lineThreshold({ name: `${config.medLevels.low}%`, value: config.medLevels.low })
+          );
 
         // 30%
         /* svg.append("path")
@@ -944,18 +997,18 @@ async function start() {
           .attr("d", lineThreshold({name: '30%', value: 30})) */
 
         // med70avg
-        svg.append("path")
+        svg
+          .append('path')
           .datum(this.meditationsStat)
-          .attr("fill", "none")
-          .attr("stroke", "green")
-          .attr("stroke-width", 1.5)
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("d", lineByIndicator('med70avg'))
-
+          .attr('fill', 'none')
+          .attr('stroke', 'green')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', lineByIndicator('med70avg'));
       },
     },
-  })
+  });
 }
 
 window.onload = start;

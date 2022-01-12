@@ -4,9 +4,9 @@ const mqtt = require('mqtt');
 const express = require('express');
 const thinkgear = require('node-thinkgear-sockets');
 const open = require('open');
-const {exec, execSync} = require('child_process');
+const { exec, execSync } = require('child_process');
 const SysTray = require('systray2').default;
-const {showConsole, hideConsole} = require('node-hide-console-window');
+const { showConsole, hideConsole } = require('node-hide-console-window');
 
 const config = require('../config'); // TODO: exclude from build
 
@@ -21,9 +21,6 @@ let systray; // global object
 
 start();
 
-
-
-
 async function start() {
   // Systray
   if (config.systray && !inited) {
@@ -32,7 +29,7 @@ async function start() {
   }
 
   // ThinkGear Connector
-  if (isWindows) await startTGC()
+  if (isWindows) await startTGC();
 
   // Socket from ThinkGear Connector
   startSockets();
@@ -51,10 +48,7 @@ async function start() {
   inited = true;
 }
 
-
-
-
-async function restart(){
+async function restart() {
   return await start();
 }
 
@@ -84,8 +78,8 @@ function mqttInit() {
   if (!isMqtt) {
     // dummy mqtt client
     return {
-      publish() {}
-    }
+      publish() {},
+    };
   }
 
   log('Connecting to MQTT...');
@@ -110,7 +104,7 @@ function mqttInit() {
 async function startTGC() {
   return new Promise((resolve, reject) => {
     const list = execSync('tasklist');
-    const isTGCRunning = `${list}`.split('\n').filter(line => line.match(/ThinkGear/)).length > 0;
+    const isTGCRunning = `${list}`.split('\n').filter((line) => line.match(/ThinkGear/)).length > 0;
 
     if (!isTGCRunning) {
       log('Launch ThinkGear Connector');
@@ -123,8 +117,7 @@ async function startTGC() {
         }
       });
       setTimeout(resolve, 5000);
-    }
-    else {
+    } else {
       resolve();
     }
   });
@@ -138,8 +131,7 @@ function startSockets() {
 
   let i = 0;
 
-  mw.on('data', function(data){
-
+  mw.on('data', function (data) {
     lastData = { signal: data.poorSignalLevel };
 
     // don't send poor data
@@ -177,7 +169,7 @@ function expressInit() {
   const app = express();
 
   // cors
-  app.use(function(req, res, next) {
+  app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
@@ -199,39 +191,35 @@ function getSysTrayMenu() {
     tooltip: '',
     click() {
       open(webInterfaceUrl);
-    }
-  }
+    },
+  };
 
   const itemShowConsole = {
     title: 'Show console',
     tooltip: '',
     click() {
       showConsole();
-    }
-  }
+    },
+  };
 
   const itemHideConsole = {
     title: 'Hide console',
     tooltip: '',
     click() {
       hideConsole();
-    }
-  }
+    },
+  };
 
-  const items = [
-    itemOpen,
-    SysTray.separator,
-    itemShowConsole,
-    itemHideConsole,
-  ];
+  const items = [itemOpen, SysTray.separator, itemShowConsole, itemHideConsole];
 
-  if (isMqtt) items.push({
-    title: 'Reconnect MQTT',
-    tooltip: '',
-    click() {
-      restart();
-    }
-  });
+  if (isMqtt)
+    items.push({
+      title: 'Reconnect MQTT',
+      tooltip: '',
+      click() {
+        restart();
+      },
+    });
 
   items.push(SysTray.separator);
 
@@ -239,8 +227,8 @@ function getSysTrayMenu() {
     title: 'Exit',
     tooltip: '',
     click() {
-      systray.kill(true)
-    }
+      systray.kill(true);
+    },
   });
 
   return {
@@ -257,22 +245,26 @@ function getSysTrayMenu() {
 function initSysTray() {
   const menu = getSysTrayMenu();
 
-  systray = new SysTray({ // global set
+  systray = new SysTray({
+    // global set
     menu: menu,
     debug: false,
-    copyDir: true // copy go tray binary to an outside directory, useful for packing tool like pkg.
-  })
+    copyDir: true, // copy go tray binary to an outside directory, useful for packing tool like pkg.
+  });
 
-  systray.onClick(action => {
+  systray.onClick((action) => {
     if (action.item.click != null) {
-      action.item.click()
+      action.item.click();
     }
-  })
+  });
 
   // Systray.ready is a promise which resolves when the tray is ready.
-  systray.ready().then(() => {
-    log('systray started')
-  }).catch(err => {
-    log('systray failed to start: ' + err.message)
-  })
+  systray
+    .ready()
+    .then(() => {
+      log('systray started');
+    })
+    .catch((err) => {
+      log('systray failed to start: ' + err.message);
+    });
 }
