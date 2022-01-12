@@ -238,8 +238,8 @@ function getSysTrayMenu() {
     icon: isWindows ? './assets/trayicon_white.ico' : './assets/trayicon_white.png',
     // a template icon is a transparency mask that will appear to be dark in light mode and light in dark mode
     isTemplateIcon: os.platform() === 'darwin',
-    title: 'mindwave-mqtt',
-    tooltip: 'mindwave-mqtt',
+    title: 'mindwave-web',
+    tooltip: 'mindwave-web',
     items: items,
   };
 }

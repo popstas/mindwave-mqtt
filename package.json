@@ -1,16 +1,16 @@
 {
-  "name": "mindwave-mqtt",
-  "version": "1.0.0",
+  "name": "mindwave-web",
+  "version": "0.8.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "vite --port 9301",
+    "dev": "vite --port 9302",
     "build": "vue-tsc --noEmit && vite build",
     "build-pkg": "pkg . --out-path dist"
   },
   "bin": {
-    "mindwave-mqtt": "src/index.js"
+    "mindwave-web": "src/index.js"
   },
   "pkg": {
     "assets": [
