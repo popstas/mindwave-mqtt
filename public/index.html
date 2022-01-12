@@ -16,7 +16,7 @@
 </head>
 <body>
   
-  <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation == 0, inited: this.state != 'idle', [state]: true }">
+  <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation === 0, inited: this.state !== 'idle', [state]: true }">
     <div class="main-values">
       <div v-if="!signal && meditation" class="main-value">
         <span class="label">Meditation:</span>
@@ -95,22 +95,22 @@
       <div class="med-compare__title" v-html="meditationCompare.name"></div>
     </div>
 
-    <button @click="startMeditation">{{ state == 'started' ? 'Stop' : 'Start' }}</button>
-    <button @click="saveMeditation" v-if="state == 'stop'">Save</button>
+    <button @click="startMeditation">{{ state === 'started' ? 'Stop' : 'Start' }}</button>
+    <button @click="saveMeditation" v-if="state === 'stop'">Save</button>
 
     <form>
       <table class="settings">
         <tr class="form-row">
-          <td><label>Meditation time, sec:</label></td>
-          <td><input size="2" v-model="meditationTimeMax" type="text" /></td>
+          <td><label for="meditationTimeMax">Meditation time, sec:</label></td>
+          <td><input id="meditationTimeMax" size="2" v-model="meditationTimeMax" type="text" /></td>
         </tr>
         <tr class="form-row">
-          <td><label>Meditation threshold:</label></td>
-          <td><input size="2" v-model="meditationFrom" type="text" /></td>
+          <td><label for="meditationFrom">Meditation threshold:</label></td>
+          <td><input id="meditationFrom" size="2" v-model="meditationFrom" type="text" /></td>
         </tr>
         <tr class="form-row">
-          <td><label>Show history from day:</label></td>
-          <td><input size="10" v-model="fromDay" type="text" /></td>
+          <td><label for="fromDay">Show history from day:</label></td>
+          <td><input id="fromDay" size="10" v-model="fromDay" type="text" /></td>
         </tr>
         <tr class="form-row">
           <td><label for="isSound">Sound:</label></td>
@@ -187,7 +187,6 @@
           <td class="med__remove">
             <a href="javascript:" @click="removeMeditation(med)">x</a>
           </td>
-        </tr>
         </tr>
       </table>
 

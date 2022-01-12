@@ -247,12 +247,12 @@ async function start() {
         this.drawChart();
       },
 
-      meditationZones(val) {
+      meditationZones() {
         this.drawChart();
         this.drawChartHistory();
       },
 
-      fromDay(val) {
+      fromDay() {
         this.drawChartHistory();
       },
 
@@ -279,7 +279,6 @@ async function start() {
         if (this.signal === 0 && this.meditation > 0){
           this.tick++;
           this.totalSum += val;
-          this.meditationAverage = Math.round(this.totalSum / this.tick);
           this.addHistory();
           this.drawChart();
           this.drawChartHistory();
@@ -303,7 +302,7 @@ async function start() {
 
 
         // first signal, actually begin
-        if (this.tick == 1) {
+        if (this.tick === 1) {
           this.meditationStart = Date.now();
 
           // begin signal
@@ -317,7 +316,7 @@ async function start() {
         }
       },
 
-      meditations(val) {
+      meditations() {
         this.drawChartHistory();
       },
 
@@ -477,7 +476,7 @@ async function start() {
       },
 
       compareMeditation(med) {
-        if (med.name == this.meditationCompare.name) this.meditationCompare = {};
+        if (med.name === this.meditationCompare.name) this.meditationCompare = {};
         else {
           this.meditationCompare = med;
           this.drawChartMeditation('svgMedCompare', this.chartDataCompare);
@@ -486,7 +485,7 @@ async function start() {
       },
 
       removeMeditation(med) {
-        this.meditations = this.meditations.filter(m => m.name != med.name);
+        this.meditations = this.meditations.filter(m => m.name !== med.name);
       },
 
       processThresholds({field, value}) {
@@ -581,14 +580,14 @@ async function start() {
       percentClass(val, type) {
         if (`${val}`.match(/%$/)) val = parseInt(val);
 
-        if (type == 'meditation70') {
+        if (type === 'meditation70') {
           if (val >= this.meditationFrom) return 'percent-highest';
           if (val >= config.medLevels.high) return 'percent-high';
           if (val > config.medLevels.low) return 'percent-mid';
           if (val > 0) return 'percent-low';
         }
 
-        if (type == 'meditation') {
+        if (type === 'meditation') {
           if (val >= 80) return 'percent-bold-big';
           if (val >= 68) return 'percent-bold';
           // if (val > 60) return 'percent-mid';
