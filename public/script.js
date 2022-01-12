@@ -467,7 +467,7 @@ async function start() {
         }
       },
 
-      loadMeditation(med) {
+      loadMeditation(med) { 
         this.history = med.history;
         this.thresholdsData = med.thresholdsData;
         this.meditationStart = med.meditationStart;
@@ -514,7 +514,7 @@ async function start() {
           // start
           if (value >= threshold) {
             if (!th.start) {
-              console.log(`start meditation ${threshold}%`);
+              // console.log(`start meditation ${threshold}%`);
               this.thresholdsData[field].thresholds[threshold].start = Date.now();
             }
           }
@@ -522,7 +522,7 @@ async function start() {
           // end
           if (value < threshold) {
             if (th.start) {
-              console.log(`stop meditation ${threshold}%`);
+              // console.log(`stop meditation ${threshold}%`);
               if (!th.loses) th.loses = 0;
               if (!th.total) th.total = 0;
               if (!th.maxTime) th.maxTime = 0;

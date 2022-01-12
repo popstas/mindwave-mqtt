@@ -180,6 +180,8 @@ function expressInit() {
     res.json(lastData);
   });
 
+  app.use('/next', express.static('dist'));
+
   app.use(express.static('public'));
 
   app.listen(config.server.port);
