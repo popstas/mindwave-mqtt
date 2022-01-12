@@ -420,7 +420,7 @@ async function start() {
         // this.meditationTime = 0;
 
         this.beep(0);
-        setTimeout(this.pause, 1100);
+        setTimeout(this.pause, 2000);
 
         this.state = 'stop';
         nosleep.disable();
