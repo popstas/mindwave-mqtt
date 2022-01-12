@@ -5,24 +5,24 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meditation</title>
-  <script src="https://unpkg.com/mqtt@3.0.0/dist/mqtt.min.js"></script>
-  <script src="https://unpkg.com/base-64/base64.js"></script>
+  <script src="https://unpkg.com/base-64@1.0.0/base64.js"></script>
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
   <script src="https://unpkg.com/vuex-persistedstate@4.0.0-beta.3/dist/vuex-persistedstate.umd.js"></script>
-  <script src="script.js?v=18"></script>
-  <link rel="stylesheet" href="style.css?v=6">
+  <script src="https://unpkg.com/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
+  <script src="script.js?v=1"></script>
+  <link rel="stylesheet" href="style.css?v=1">
 </head>
 <body>
   
-  <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation == 0 }">
+  <div id="app" :class="{ 'poor-signal': !!this.signal || this.meditation == 0, inited: this.state != 'idle', [state]: true }">
     <div class="main-values">
-      <div v-if="!signal" class="main-value">
+      <div v-if="!signal && meditation" class="main-value">
         <span class="label">Meditation:</span>
         <span class="value">{{ meditation }}</span>
-      </div>
-      <div v-if="!signal" class="main-value">
+      </div> 
+      <div v-if="!signal && attention" class="main-value">
         <span class="label">Attention:</span>
         <span class="value">{{ attention }}</span>
       </div>
@@ -32,25 +32,30 @@
       </div>
     </div>
 
-    <div class="stats-row">
+    <div class="stats-row stats-meditation">
       <table class="stats" v-if="thresholdsData.meditation">
         <tr v-if="thresholdsData.meditation.average" class="stats-value">
           <td class="label">Meditation avg:</td>
-          <td class="value">{{ thresholdsData.meditation.average }}%</td>
+          <td class="value">
+            {{ thresholdsData.meditation.average }}%
+            <span v-if="meditationCompare.thresholdsData && meditationCompare.thresholdsData.meditation.average">
+              {{ meditationCompare.thresholdsData.meditation.average - thresholdsData.meditation.average }}
+            </span>
+          </td>
         </tr>
 
         <tr class="stats-value" v-for="(th, val) in thresholdsData.meditation.thresholds" :key="val">
           <td class="label">{{ val }}%:</td>
           <td class="value">
             {{ mmss(th.total) }}
-            <span class="percent" v-if="th.total">({{ timePercent(th.total) }})</span>
+            <span :class="['percent', percentClass(timePercent(th.total), `meditation${val}`)]" v-if="th.total">({{ timePercent(th.total) }})</span>
             <span class="max" v-if="th.maxTime">, max: {{ mmss(th.maxTime) }}</span>
             <span class="loses" v-if="th.loses">, count: {{ th.loses }}</span>
           </td>
         </tr>
       </table>
     </div>
-    <div class="stats-row">
+    <div class="stats-row stats-attention">
       <table class="stats" v-if="thresholdsData.attention">
         <tr v-if="thresholdsData.attention.average" class="stats-value">
           <td class="label">Attention avg:</td>
@@ -73,31 +78,140 @@
       <span class="value">{{ mmss(meditationTime) }}</span>
     </div>
 
-    <div ref="chart">
-      <svg ref="svg"  width="1000" height="300"></svg>
+    <!-- main chart -->
+    <div>
+      <svg id="svgMed" ref="svgMed"  width="1000" height="300"></svg>
+    </div>
+
+    <div><input
+      class="meditation-name"
+      v-model="meditationName"
+      placeholder="Name"
+      v-bind:style="{width: meditationNameWidth + 'px'}"
+    /></div>
+
+    <div class="med-compare" v-if="meditationCompare">
+      <svg id="svgMedCompare" ref="svgMedCompare"  width="1000" height="0"></svg>
+      <div class="med-compare__title" v-html="meditationCompare.name"></div>
     </div>
 
     <button @click="startMeditation">{{ state == 'started' ? 'Stop' : 'Start' }}</button>
+    <button @click="saveMeditation" v-if="state == 'stop'">Save</button>
 
     <form>
       <table class="settings">
+        <tr class="form-row">
+          <td><label>Meditation time, sec:</label></td>
+          <td><input size="2" v-model="meditationTimeMax" type="text" /></td>
+        </tr>
         <tr class="form-row">
           <td><label>Meditation threshold:</label></td>
           <td><input size="2" v-model="meditationFrom" type="text" /></td>
         </tr>
         <tr class="form-row">
+          <td><label>Show history from day:</label></td>
+          <td><input size="10" v-model="fromDay" type="text" /></td>
+        </tr>
+        <tr class="form-row">
           <td><label for="isSound">Sound:</label></td>
           <td>
             <input id="isSound" type="checkbox" v-model="isSound" />
-            <!-- <label>Частота, Гц:</label> <input size="2" v-model="soundFrequency" type="text" /> -->
           </td>
         </tr>
         <tr class="form-row">
-          <td><label for="halfChart">Chart from 70%:</label></td>
-          <td><input id="halfChart" type="checkbox" v-model="halfChart" /></td>
+          <td><label for="halfChartTop">Chart from 70%:</label></td>
+          <td><input id="halfChartTop" type="checkbox" v-model="halfChartTop" /></td>
+        </tr>
+        <tr class="form-row">
+          <td><label for="halfChartBottom">Chart to 30%:</label></td>
+          <td><input id="halfChartBottom" type="checkbox" v-model="halfChartBottom" /></td>
+        </tr>
+        <tr class="form-row">
+          <td><label for="meditationZones">Show zones:</label></td>
+          <td><input id="meditationZones" type="checkbox" v-model="meditationZones" /></td>
         </tr>
       </table>
     </form>
+
+    <div class="meditations-list" v-if="meditations.length > 0">
+      <h2>History</h2>
+
+      <div>
+        <svg id="svgHistory" ref="svgHistory"  width="1000" height="300"></svg>
+      </div>
+  
+        <table class="meditation-items">
+        <tr>
+          <th
+            v-for="name in ['Date', 'Name', 'Time', 'Med70', 'Med80', 'Med90', 'Med100',  'Med', 'Med70 mins', 'Att', '']"
+            :class="'med__' + name.toLowerCase()"
+            :key="name"
+            v-html="name"
+          ></th>
+        </tr>
+        
+        <tr class="meditation-item med" v-for="med of meditations">
+          <td :class="{'med__date': true, 'med__date_today': Date.now() - med.meditationStart < 86400000}">
+            <span>{{ day(med.meditationStart) }}</span>
+          </td>
+          <td class="med__name">
+            <a title="click for load" href="javascript:" v-html="med.name" @click="loadMeditation(med)"></a>
+          </td>
+          <td class="med__time">
+            <span>{{ mmss(med.meditationTime) }}</span>
+          </td>
+          <td class="med__med70">
+            <span :class="percentClass(Math.round(med.thresholdsData.meditation.thresholds[70].total / med.meditationTime * 100), 'meditation70')">{{ Math.round(med.thresholdsData.meditation.thresholds[70].total / med.meditationTime * 100) }}%</span>
+          </td>
+          <td class="med__med80">
+            <span :class="percentClass(Math.round(med.thresholdsData.meditation.thresholds[80].total / med.meditationTime * 100), 'meditation80')">{{ Math.round(med.thresholdsData.meditation.thresholds[80].total / med.meditationTime * 100) }}%</span>
+          </td>
+          <td class="med__med90">
+            <span :class="percentClass(Math.round(med.thresholdsData.meditation.thresholds[90].total / med.meditationTime * 100), 'meditation90')">{{ Math.round(med.thresholdsData.meditation.thresholds[90].total / med.meditationTime * 100) }}%</span>
+          </td>
+          <td class="med__med100">
+            <span :class="percentClass(Math.round(med.thresholdsData.meditation.thresholds[100].total / med.meditationTime * 100), 'meditation100')">{{ Math.round(med.thresholdsData.meditation.thresholds[100].total / med.meditationTime * 100) }}%</span>
+          </td>
+          <td class="med__med">
+            <span :class="percentClass(med.thresholdsData.meditation.average, 'meditation')">{{ med.thresholdsData.meditation.average }}%</span>
+          </td>
+          <td class="med__med70total">
+            <span :class="percentClass(med.thresholdsData.meditation.thresholds[70].total / 60, 'med70total')">{{ Math.round(med.thresholdsData.meditation.thresholds[70].total / 60 * 10) / 10 }}</span>
+          </td>
+          <td class="med__att">
+            <span :class="percentClass(med.thresholdsData.attention.average, 'attention')">{{ med.thresholdsData.attention.average }}%</span>
+          </td>
+          <td class="med__compare">
+            <a href="javascript:" @click="compareMeditation(med)">сравнить</a>
+          </td>
+          <td class="med__remove">
+            <a href="javascript:" @click="removeMeditation(med)">x</a>
+          </td>
+        </tr>
+        </tr>
+      </table>
+
+      <table class="meditation-days">
+        <tr>
+          <td>day</td>
+          <td>med70 avg</td>
+          <td>med80 avg</td>
+          <td>med90 avg</td>
+          <td>med 70 mins</td>
+          <td>count</td>
+          <td>mins</td>
+        </tr>
+        <tr v-for="med in meditationsStat" :key="med.day">
+          <td v-html="med.day"></td>
+          <td :class="percentClass(med.med70avg, 'meditation70')" v-html="parseInt(med.med70avg)"></td>
+          <td v-html="parseInt(med.med80avg)"></td>
+          <td v-html="parseInt(med.med90avg)"></td>
+          <td v-html="parseInt(med.med70totalMins)"></td>
+          <td v-html="med.count"></td>
+          <td v-html="med.mins"></td>
+        </tr>
+      </table>
+    </div>
   </div>
 </body>
 </html>
