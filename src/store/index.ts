@@ -13,6 +13,10 @@ export interface State {
   meditationFrom: number,
   fromDay: string,
   meditations: MeditationType[],
+
+  mindwaveUrl: string,
+  medLevels: Object,
+  thresholdsFrequency: Object,
 }
 
 
