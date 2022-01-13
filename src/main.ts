@@ -8,6 +8,7 @@ import routes from "virtual:generated-pages";
 import App from "./App";
 import {store, key} from "./store";
 
+console.log('test');
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes,

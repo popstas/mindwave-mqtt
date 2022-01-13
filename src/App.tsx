@@ -1,17 +1,17 @@
-import { defineComponent, onMounted } from "vue";
-import { RouterView } from "vue-router";
-import useStore from "@/helpers/useStore";
+import { defineComponent, onMounted } from 'vue';
+import { RouterView } from 'vue-router';
+import useStore from '@/helpers/useStore';
 
 export default defineComponent({
-    setup() {
-        const store = useStore();
-        onMounted(() => {
-        });
+  setup() {
+    const store = useStore();
+    console.log(store);
+    onMounted(() => {});
 
-        return () => (
-            <div>
-                <RouterView />
-            </div>
-        );
-    },
+    return () => (
+      <div>
+        <RouterView />
+      </div>
+    );
+  },
 });

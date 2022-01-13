@@ -4,6 +4,10 @@
 //   history: Meditation[];
 // }
 
+export interface MeditationType {
+  
+}
+
 export interface MeditationDataType {
   d: number, // date
   m: number, // meditation
