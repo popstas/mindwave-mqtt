@@ -1,4 +1,6 @@
+const fs = require('fs');
 const os = require('os');
+const path = require('path');
 const isWindows = os.platform() === 'win32';
 const mqtt = require('mqtt');
 const express = require('express');
@@ -7,6 +9,7 @@ const open = require('open');
 const { exec, execSync } = require('child_process');
 const SysTray = require('systray2').default;
 const { showConsole, hideConsole } = require('node-hide-console-window');
+const { createServer: createViteServer } = require('vite');
 
 const config = require('../config'); // TODO: exclude from build
 
@@ -22,6 +25,8 @@ let systray; // global object
 start();
 
 async function start() {
+  createViteExpress();
+
   // Systray
   if (config.systray && !inited) {
     initSysTray();
@@ -98,6 +103,63 @@ function mqttInit() {
   });
 
   return client;
+}
+
+// https://vitejs.dev/guide/ssr.html#setting-up-the-dev-server
+async function createViteExpress() {
+  const app = express();
+
+  // Create Vite server in middleware mode. This disables Vite's own HTML
+  // serving logic and let the parent server take control.
+  //
+  // In middleware mode, if you want to use Vite's own HTML serving logic
+  // use `'html'` as the `middlewareMode` (ref https://vitejs.dev/config/#server-middlewaremode)
+  const vite = await createViteServer({
+    server: { middlewareMode: 'ssr' },
+  });
+  // use vite's connect instance as middleware
+  app.use(vite.middlewares);
+
+  async function viteServerHandler(req, res) {
+    const url = req.originalUrl;
+
+    try {
+      // 1. Read index.html
+      let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
+
+      // 2. Apply Vite HTML transforms. This injects the Vite HMR client, and
+      //    also applies HTML transforms from Vite plugins, e.g. global preambles
+      //    from @vitejs/plugin-react
+      template = await vite.transformIndexHtml(url, template);
+
+      // 3. Load the server entry. vite.ssrLoadModule automatically transforms
+      //    your ESM source code to be usable in Node.js! There is no bundling
+      //    required, and provides efficient invalidation similar to HMR.
+      const { render } = await vite.ssrLoadModule('/src/index.ts');
+
+      // 4. render the app HTML. This assumes entry-server.js's exported `render`
+      //    function calls appropriate framework SSR APIs,
+      //    e.g. ReactDOMServer.renderToString()
+      const appHtml = await render(url);
+
+      // 5. Inject the app-rendered HTML into the template.
+      const html = template.replace(`<!--ssr-outlet-->`, appHtml);
+
+      // 6. Send the rendered HTML back.
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+    } catch (e) {
+      // If an error is caught, let Vite fix the stracktrace so it maps back to
+      // your actual source code.
+      vite.ssrFixStacktrace(e);
+      console.error(e);
+      res.status(500).end(e.message);
+    }
+  }
+  app.use('*', viteServerHandler);
+
+  app.listen(config.server.vitePort);
+
+  log('Vite inited on port ' + config.server.vitePort);
 }
 
 // start ThinkGear Connector if not started
