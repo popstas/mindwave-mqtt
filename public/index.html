@@ -153,7 +153,7 @@
         
         <tr class="meditation-item med" v-for="med of meditations">
           <td :class="{'med__date': true, 'med__date_today': Date.now() - med.meditationStart < 86400000}">
-            <span>{{ day(med.meditationStart) }}</span>
+            <span>{{ dateTime(med.meditationStart) }}</span>
           </td>
           <td class="med__name">
             <a title="click for load" href="javascript:" v-html="med.name" @click="loadMeditation(med)"></a>

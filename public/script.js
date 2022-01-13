@@ -553,6 +553,14 @@ async function start() {
         return `${min}:${sec}`;
       },
 
+      // yyyy-mm-dd hh:mm
+      dateTime(ts) {
+        if (!ts) return '';
+        ts += new Date().getTimezoneOffset() * -60 * 1000;
+        return new Date(ts).toISOString().replace('T', ' ').substring(0, 16);
+      },
+
+      // yyyy-mm-dd
       day(ts) {
         if (!ts) return '';
         ts += new Date().getTimezoneOffset() * -60 * 1000;
