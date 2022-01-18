@@ -37,6 +37,7 @@ const persistentFields = [
     names.map((name) => {
       mutations[name] = (state: any, val: any) => {
         state[name] = val;
+        // console.log(`set state.${name}: ${val}`);
       };
     });
     return mutations;
@@ -48,10 +49,10 @@ const mutations = mutationFabric(persistentFields);
 export const key: InjectionKey<Store<State>> = Symbol('store');
 export const store = createStore({
   state: defaultState,
-  /* plugins: [
+  plugins: [
     createPersistedState({
       paths: persistentFields,
     }),
-  ], */
+  ],
   mutations,
 });

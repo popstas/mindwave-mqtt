@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "vite --port 9302",
+    "dev": "vite --port 9302 --host",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx,vue}\" --quiet",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc --noEmit && vite build",
+    "build-dev": "vite build",
     "build-pkg": "pkg . --out-path dist"
   },
   "bin": {
@@ -25,6 +26,7 @@
   "dependencies": {
     "base-64": "^1.0.0",
     "d3": "^7.3.0",
+    "element-plus": "^1.3.0-beta.5",
     "express": "^4.17.2",
     "mqtt": "^4.2.6",
     "node-hide-console-window": "^2.1.0",

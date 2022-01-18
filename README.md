@@ -42,3 +42,6 @@ npm run dev # vite app
 - Vite, TS
 - Vuex, vuex-persistedstate
 - D3.js
+
+### TODO
+- Meditation tags

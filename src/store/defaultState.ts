@@ -4,12 +4,13 @@ export const defaultState: State = {
   halfChartTop: false,
   halfChartBottom: false,
   meditationZones: true,
-  meditationTimeMax: 600,
+  meditationTimeMax: 300,
   meditationFrom: 70,
   fromDay: '',
   meditations: [],
 
   mindwaveUrl: 'http://localhost:9301/mindwave',
+  // mindwaveUrl: 'https://test.home.popstas.ru/mindwave-test.php',
   medLevels: {
     low: 35,
     high: 50,

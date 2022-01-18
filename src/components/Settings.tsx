@@ -1,5 +1,6 @@
-import { defineComponent } from 'vue';
+import { defineComponent, computed, watch } from 'vue';
 import useStore from "@/helpers/useStore";
+import { ElForm, ElFormItem, ElInput, ElCheckbox } from 'element-plus'
 
 export default defineComponent({
   name: 'Settings',
@@ -7,67 +8,59 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
+    const modelNames = [
+      'meditationTimeMax',
+      'meditationFrom',
+      'fromDay',
+      'isSound',
+      'halfChartTop',
+      'halfChartBottom',
+      'meditationZones',
+    ];
+
+    const models = {};
+    for (let name of modelNames) {
+      models[name] = computed({
+        get: () => store.state[name],
+        set: (val) => {
+          // console.log('commit ' + name, val);
+          return store.commit(name, val);
+        }
+      });
+    }
+
+    watch(models.halfChartTop, (val) => {
+      if (val) models.halfChartBottom.value = false;
+    });
+    watch(models.halfChartBottom, (val) => {
+      if (val) models.halfChartTop.value = false;
+    });
+
     return () => (
-      <form>
-        <table class="settings">
-          <tr class="form-row">
-            <td>
-              <label for="meditationTimeMax">Meditation time, sec:</label>
-            </td>
-            <td>
-              <input id="meditationTimeMax" size="2" value={store.state.meditationTimeMax} type="text" />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="meditationFrom">Meditation threshold:</label>
-            </td>
-            <td>
-              <input id="meditationFrom" size="2" value={store.state.meditationFrom} type="text" />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="fromDay">Show history from day:</label>
-            </td>
-            <td>
-              <input id="fromDay" size="10" value={store.state.fromDay} type="text" />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="isSound">Sound:</label>
-            </td>
-            <td>
-              <input id="isSound" type="checkbox" value={store.state.isSound} />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="halfChartTop">Chart from 70%:</label>
-            </td>
-            <td>
-              <input id="halfChartTop" type="checkbox" value={store.state.halfChartTop} />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="halfChartBottom">Chart to 30%:</label>
-            </td>
-            <td>
-              <input id="halfChartBottom" type="checkbox" value={store.state.halfChartBottom} />
-            </td>
-          </tr>
-          <tr class="form-row">
-            <td>
-              <label for="meditationZones">Show zones:</label>
-            </td>
-            <td>
-              <input id="meditationZones" type="checkbox" value={store.state.meditationZones} />
-            </td>
-          </tr>
-        </table>
-      </form>
+      <ElForm class="settings" label-width="120px">
+        <ElFormItem label="Meditation time, sec">
+          <ElInput v-model={models['meditationTimeMax'].value}></ElInput>
+        </ElFormItem>
+        <ElFormItem label="Meditation threshold">
+          <ElInput v-model={models['meditationFrom'].value}></ElInput>
+        </ElFormItem>
+        <ElFormItem label="Show history from day">
+          <ElInput v-model={models['fromDay'].value}></ElInput>
+        </ElFormItem>
+
+        <ElFormItem label="Sound">
+          <ElCheckbox v-model={models['isSound'].value}></ElCheckbox>
+        </ElFormItem>
+        <ElFormItem label="Chart from 70%">
+          <ElCheckbox v-model={models['halfChartTop'].value}></ElCheckbox>
+        </ElFormItem>
+        <ElFormItem label="Chart to 30%">
+          <ElCheckbox v-model={models['halfChartBottom'].value}></ElCheckbox>
+        </ElFormItem>
+        <ElFormItem label="Show zones">
+          <ElCheckbox v-model={models['meditationZones'].value}></ElCheckbox>
+        </ElFormItem>
+      </ElForm>
     );
   },
 });

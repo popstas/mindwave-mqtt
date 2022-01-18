@@ -5,7 +5,17 @@
 // }
 
 export interface MeditationType {
-  
+  name: string,
+  meditationStart: number,
+  meditationTime: number,
+  history: MeditationDataType[],
+  thresholdsData: {},
+  tick: number,
+  totalSum: number,
+
+  meditationCompare: {},
+  state: string,
+  isPlay: boolean, // TODO: to store
 }
 
 export interface MeditationDataType {

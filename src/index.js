@@ -57,6 +57,7 @@ async function restart() {
   return await start();
 }
 
+// TODO: ...arguments
 function log(msg, type = 'info') {
   const tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
   const d = new Date(Date.now() - tzoffset)

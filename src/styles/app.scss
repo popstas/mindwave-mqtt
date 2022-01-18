@@ -1,3 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 body {
   background: #333;
   color: #ccc;
@@ -31,10 +49,11 @@ input {
   color: #ccc;
 }
 
-.meditation-name {
+.meditation-name input{
   text-align: center;
   border: none;
   padding: 3px;
+  width: 60%; // TODO: fix on mobile
 }
 
 .main-value {
@@ -91,6 +110,7 @@ input {
 button {
   margin-top: 10px;
   font-size: 30px;
+  padding: 0 10px;
   background: none;
   color: #ccc;
 }
@@ -193,3 +213,27 @@ svg {
 
 .main-values::after { display: block; content: ''; clear: both; }
 .stats-attention { display: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+.current-meditation input{
+  text-align: center;
+}
+
+
+
+/* Settings component */
+.settings {
+  max-width: 480px;
+  margin: 0 auto;
+}

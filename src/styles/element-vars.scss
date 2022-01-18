@@ -1,0 +1,6 @@
+// https://element-plus.org/en-US/guide/theming.html#by-scss-variables
+
+$--el-text-color-primary: #ccc !important;
+$--el-bg-color: #333;
+
+@use 'node_modules/element-plus/theme-chalk/src/index';
