@@ -7,9 +7,17 @@ import pages from "vite-plugin-pages";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/next",
   resolve: {
     alias: { "@/": `${path.resolve(__dirname, "src")}/` },
+  },
+  server: {
+    // hmr: false,
+    hmr: {
+      // host: 'localhost',
+      // port: 443,
+    },
+    // https: true,
+    // cors: true,
   },
   plugins: [
     vue(),

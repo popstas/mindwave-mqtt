@@ -13,6 +13,7 @@ module.exports = {
   },
   server: {
     port: 9301,
+    vitePort: 9302,
   },
   systray: true,
   openWebOnStart: true,

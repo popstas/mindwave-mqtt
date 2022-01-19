@@ -15,7 +15,9 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
 
-    const nosleep = new NoSleep();
+    let nosleep;
+    if (!import.meta.env.SSR) nosleep = new NoSleep();
+    else nosleep = {enable: () => {}, disable: () => {}}
     // console.log('store:', store);
     // console.log('props:', props);
 

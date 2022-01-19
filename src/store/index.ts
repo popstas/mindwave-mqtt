@@ -47,12 +47,17 @@ const persistentFields = [
 const mutations = mutationFabric(persistentFields);
 
 export const key: InjectionKey<Store<State>> = Symbol('store');
+
+const plugins = [];
+if (!import.meta.env.SSR) {
+  const persist = createPersistedState({
+    paths: persistentFields,
+  });
+  plugins.push(persist)
+}
+
 export const store = createStore({
   state: defaultState,
-  plugins: [
-    createPersistedState({
-      paths: persistentFields,
-    }),
-  ],
+  plugins,
   mutations,
 });

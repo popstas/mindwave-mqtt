@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 import 'virtual:windi.css';
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createSSRApp } from 'vue';
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router';
 
 import ElementPlus from 'element-plus';
 // import 'element-plus/dist/index.css';
@@ -14,25 +14,16 @@ import routes from 'virtual:generated-pages';
 import App from './App';
 import { store, key } from './store';
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-});
 
-const app = createApp(App);
-app.use(store, key);
+export function createApp() {
+  const app = createSSRApp(App);
+  app.use(store, key);
 
-async function mount() {
-  // const { data } = await api.get<ReferencesType>("user/references");
-  // store.commit<MutationDataTypes["SET_REFERENCES"]>({
-  //     type: "SET_REFERENCES",
-  //     payload: data,
-  // });
+  const isServer = typeof window === 'undefined';
+  const history = isServer ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL);
+  const router = createRouter({ history, routes });
+  app.use(router);
 
   app.use(ElementPlus, { size: 'small' });
-  app.use(router);
-  app.mount('#app');
-  // window.$app = app;
+  return { app, router }
 }
-
-void mount();

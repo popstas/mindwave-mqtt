@@ -42,8 +42,10 @@ export function percentClass(str: string, type: string) {
 }
 
 export function clientWidth() {
+  if (import.meta.env.SSR) return 0;
   return window.innerWidth > 0 ? window.innerWidth : screen.width;
 }
 export function clientHeight() {
+  if (import.meta.env.SSR) return 0;
   return window.innerHeight > 0 ? window.innerHeight : screen.height;
 }

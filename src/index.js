@@ -12,6 +12,7 @@ const { showConsole, hideConsole } = require('node-hide-console-window');
 const { createServer: createViteServer } = require('vite');
 
 const config = require('../config'); // TODO: exclude from build
+const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD
 
 const isMqtt = config.mqtt && config.mqtt.enabled !== false;
 const webInterfaceUrl = `http://localhost:${config.server.port}`;
@@ -40,7 +41,7 @@ async function start() {
   startSockets();
 
   // static app and /mindwave route
-  if (!inited) expressInit();
+  if (!inited) await expressInit();
 
   // mqtt
   mqttClient = mqttInit();
@@ -106,61 +107,92 @@ function mqttInit() {
   return client;
 }
 
+function createViteExpress() {
+  createViteServerSSR().then(({ app }) => {
+    app.listen(config.server.vitePort, () => {
+      console.log(`Vite server listen on port ${config.server.vitePort}`);
+    })
+  })
+}
+
 // https://vitejs.dev/guide/ssr.html#setting-up-the-dev-server
-async function createViteExpress() {
-  const app = express();
+async function createViteServerSSR(
+  app = null,
+  root = process.cwd(),
+  isProd = process.env.NODE_ENV === 'production'
+) {
+  const resolve = (p) => path.resolve(__dirname, p)
 
-  // Create Vite server in middleware mode. This disables Vite's own HTML
-  // serving logic and let the parent server take control.
-  //
-  // In middleware mode, if you want to use Vite's own HTML serving logic
-  // use `'html'` as the `middlewareMode` (ref https://vitejs.dev/config/#server-middlewaremode)
-  const vite = await createViteServer({
-    server: { middlewareMode: 'ssr' },
-  });
-  // use vite's connect instance as middleware
-  app.use(vite.middlewares);
+  const indexProd = isProd
+    ? fs.readFileSync(resolve('../dist/client/index.html'), 'utf-8')
+    : ''
 
-  async function viteServerHandler(req, res) {
-    const url = req.originalUrl;
+  const manifest = isProd
+    ? // @ts-ignore
+      require('../dist/client/ssr-manifest.json')
+    : {}
 
-    try {
-      // 1. Read index.html
-      let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
+  if (!app) app = express()
 
-      // 2. Apply Vite HTML transforms. This injects the Vite HMR client, and
-      //    also applies HTML transforms from Vite plugins, e.g. global preambles
-      //    from @vitejs/plugin-react
-      template = await vite.transformIndexHtml(url, template);
-
-      // 3. Load the server entry. vite.ssrLoadModule automatically transforms
-      //    your ESM source code to be usable in Node.js! There is no bundling
-      //    required, and provides efficient invalidation similar to HMR.
-      const { render } = await vite.ssrLoadModule('/src/index.ts');
-
-      // 4. render the app HTML. This assumes entry-server.js's exported `render`
-      //    function calls appropriate framework SSR APIs,
-      //    e.g. ReactDOMServer.renderToString()
-      const appHtml = await render(url);
-
-      // 5. Inject the app-rendered HTML into the template.
-      const html = template.replace(`<!--ssr-outlet-->`, appHtml);
-
-      // 6. Send the rendered HTML back.
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
-    } catch (e) {
-      // If an error is caught, let Vite fix the stracktrace so it maps back to
-      // your actual source code.
-      vite.ssrFixStacktrace(e);
-      console.error(e);
-      res.status(500).end(e.message);
-    }
+  /**
+   * @type {import('vite').ViteDevServer}
+   */
+  let vite
+  if (!isProd) {
+    vite = await require('vite').createServer({
+      root,
+      logLevel: isTest ? 'error' : 'info',
+      server: {
+        middlewareMode: 'ssr',
+        watch: {
+          // During tests we edit the files too fast and sometimes chokidar
+          // misses change events, so enforce polling for consistency
+          usePolling: true,
+          interval: 100
+        }
+      }
+    })
+    // use vite's connect instance as middleware
+    app.use(vite.middlewares)
+  } else {
+    app.use(require('compression')())
+    app.use(
+      require('serve-static')(resolve('..dist/client'), {
+        index: false
+      })
+    )
   }
-  app.use('*', viteServerHandler);
 
-  app.listen(config.server.vitePort);
+  app.use('*', async (req, res) => {
+    try {
+      const url = req.originalUrl
 
-  log('Vite inited on port ' + config.server.vitePort);
+      let template, render
+      if (!isProd) {
+        // always read fresh template in dev
+        template = fs.readFileSync(resolve('index.html'), 'utf-8')
+        template = await vite.transformIndexHtml(url, template)
+        render = (await vite.ssrLoadModule('/src/entry-server')).render
+      } else {
+        template = indexProd
+        render = require('../dist/server/entry-server').render
+      }
+
+      const [appHtml, preloadLinks] = await render(url, manifest)
+
+      const html = template
+        .replace(`<!--preload-links-->`, preloadLinks)
+        .replace(`<!--app-html-->`, appHtml)
+
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+    } catch (e) {
+      vite && vite.ssrFixStacktrace(e)
+      console.log(e.stack)
+      res.status(500).end(e.stack)
+    }
+  })
+
+  return { app, vite }
 }
 
 // start ThinkGear Connector if not started
@@ -228,7 +260,7 @@ function startSockets() {
   mw.connect();
 }
 
-function expressInit() {
+async function expressInit() {
   const app = express();
 
   // cors
@@ -243,9 +275,11 @@ function expressInit() {
     res.json(lastData);
   });
 
-  app.use('/next', express.static('dist'));
+  app.use('/dist', express.static('dist/client'));
 
-  app.use(express.static('public'));
+  app.use('/old', express.static('public'));
+
+  await createViteServerSSR(app);
 
   app.listen(config.server.port);
 }
