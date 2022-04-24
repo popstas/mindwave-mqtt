@@ -1,7 +1,7 @@
 import useFirebaseApp from '@/helpers/useFirebaseApp';
 import { getDatabase, onValue } from 'firebase/database';
 import { store } from '@/store';
-import { ref, set, DatabaseReference } from '@firebase/database';
+import { ref, set, get, child, DatabaseReference } from '@firebase/database';
 
 const app = useFirebaseApp();
 const db = getDatabase(app);
@@ -13,7 +13,7 @@ export function dbGet(path: string, onData: (data?: {}, dbRef?: DatabaseReferenc
   }
 
   const dbRef = ref(db, `users/${store.state.user.uid}/${path}`);
-  onValue(dbRef, snapshot => {
+  get(dbRef).then(snapshot => {
     const data = snapshot.val();
     if (data) {
       onData(data, dbRef);

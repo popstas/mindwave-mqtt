@@ -1,15 +1,19 @@
 import { State } from "./index";
 export const defaultState: State = {
-  isSound: true,
-  halfChartTop: false,
-  halfChartBottom: false,
-  meditationZones: true,
-  meditationTimeMax: 300,
-  meditationFrom: 70,
-  fromDay: '',
+  settings: {
+    isSound: true,
+    halfChartTop: false,
+    halfChartBottom: false,
+    meditationZones: true,
+    meditationTimeMax: 300,
+    meditationFrom: 70,
+    fromDay: '',
+  },
+  meditationsBrief: [],
+  meditationsData: [],
   meditations: [],
-  user: undefined,
 
+  user: undefined,
   mindwaveUrl: 'http://localhost:9301/mindwave',
   // mindwaveUrl: 'https://test.home.popstas.ru/mindwave-test.php',
   medLevels: {

@@ -47,11 +47,11 @@ export default defineComponent({
 
       for (const name of settingsNames) {
         const remote = settings[name];
-        const local = store.state[name];
+        const local = store.state.settings[name];
         if (remote !== undefined) {
           if (remote !== local) {
             isChanged = true;
-            store.commit(name, remote);
+            store.state.settings[name] = remote;
           }
         } else {
           isChanged = true;

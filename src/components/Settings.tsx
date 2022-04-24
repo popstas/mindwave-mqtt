@@ -1,6 +1,7 @@
 import { defineComponent, computed, watch } from 'vue';
 import useStore from "@/helpers/useStore";
 import { ElForm, ElFormItem, ElInput, ElCheckbox } from 'element-plus'
+import { dbSet } from '@/helpers/firebaseDb';
 
 export default defineComponent({
   name: 'Settings',
@@ -8,23 +9,16 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const modelNames = [
-      'meditationTimeMax',
-      'meditationFrom',
-      'fromDay',
-      'isSound',
-      'halfChartTop',
-      'halfChartBottom',
-      'meditationZones',
-    ];
-
+    // console.log("store.state.settings:", store.state.settings);
     const models = {};
-    for (let name of modelNames) {
+    for (let name in store.state.settings) {
       models[name] = computed({
-        get: () => store.state[name],
+        get: () => store.state.settings[name],
         set: (val) => {
           // console.log('commit ' + name, val);
-          return store.commit(name, val);
+          store.state.settings[name] = val;
+          dbSet('settings', store.state.settings);
+          store.commit('settings', store.state.settings);
         }
       });
     }

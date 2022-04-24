@@ -21,9 +21,9 @@ export default defineComponent({
     const width = clientWidth(); // 100% ширины
     const height = Math.max(clientHeight() / 3, 300); // 300 точек или 1/3 высоты экрана: что больше
 
-    const halfChartTop = computed(() => store.state.halfChartTop);
-    const halfChartBottom = computed(() => store.state.halfChartBottom);
-    const meditationZones = computed(() => store.state.meditationZones);
+    const halfChartTop = computed(() => store.state.settings.halfChartTop);
+    const halfChartBottom = computed(() => store.state.settings.halfChartBottom);
+    const meditationZones = computed(() => store.state.settings.meditationZones);
 
     watch([chartData, halfChartTop, halfChartBottom, meditationZones], (val) => {
       // console.log('chartData: ', chartData);
@@ -41,7 +41,7 @@ export default defineComponent({
         const att = elem.a || elem.values.attention;
         const date = elem.d || elem.date;
 
-        const isMed = m >= store.state.meditationFrom ? 100 : 0;
+        const isMed = m >= store.state.settings.meditationFrom ? 100 : 0;
 
         const seconds = Math.round((date - med.value.meditationStart) / 1000);
 
@@ -51,7 +51,7 @@ export default defineComponent({
           meditation: m,
           isMeditationHigh: isMed,
           isMeditationMed:
-            m >= store.state.medLevels.low && m < store.state.meditationFrom ? 100 : 0,
+            m >= store.state.medLevels.low && m < store.state.settings.meditationFrom ? 100 : 0,
           isMeditationLow: m < store.state.medLevels.low ? 100 : 0,
           isMeditation80: m >= 80 ? 100 : 0,
           isMeditation90: m >= 90 ? 100 : 0,
@@ -72,8 +72,8 @@ export default defineComponent({
       // this.$refs[svgId].setAttribute('height', height); // TODO:
       // console.log('this.chartData.length: ', this.chartData.length);
 
-      const chartFrom = store.state.halfChartTop ? 72 : 10; // если поставить 0, то будет с -10
-      const chartTo = store.state.halfChartBottom ? 30 : 100;
+      const chartFrom = store.state.settings.halfChartTop ? 72 : 10; // если поставить 0, то будет с -10
+      const chartTo = store.state.settings.halfChartBottom ? 30 : 100;
 
       const lineByIndicator = (name) => {
         return d3
@@ -170,7 +170,7 @@ export default defineComponent({
         .attr('d', lineByIndicator('attention'));
 
       // isMeditationHigh
-      if (store.state.meditationZones) {
+      if (store.state.settings.meditationZones) {
         svg
           .append('path')
           .datum(chartData)
@@ -241,7 +241,7 @@ export default defineComponent({
         .datum(chartData)
         .attr('stroke', 'green')
         .style('stroke-dasharray', '5, 5')
-        .attr('d', lineThreshold({ name: store.state.meditationFrom + '%', value: store.state.meditationFrom }));
+        .attr('d', lineThreshold({ name: store.state.settings.meditationFrom + '%', value: store.state.settings.meditationFrom }));
 
       // 80%
       svg

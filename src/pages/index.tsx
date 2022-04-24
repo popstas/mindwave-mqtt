@@ -157,7 +157,7 @@ export default defineComponent({
       // тут вся статистика в days
       for (let day in days) {
         const ds = days[day];
-        if (store.state.fromDay && ds.date < new Date(store.state.fromDay)) continue; // limit From day
+        if (store.state.settings.fromDay && ds.date < new Date(store.state.settings.fromDay)) continue; // limit From day
 
         // считаем средние
         for (let t of [70, 80, 90, 100]) {

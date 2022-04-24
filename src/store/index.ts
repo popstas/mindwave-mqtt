@@ -5,13 +5,16 @@ import { defaultState } from './defaultState';
 import { MeditationType, UserType, MeditationBriefType } from '@/helpers/types';
 
 export interface State {
-  isSound: boolean,
-  halfChartTop: boolean,
-  halfChartBottom: boolean,
-  meditationZones: boolean,
-  meditationTimeMax: number,
-  meditationFrom: number,
-  fromDay: string,
+  settings: {
+    isSound: boolean,
+    halfChartTop: boolean,
+    halfChartBottom: boolean,
+    meditationZones: boolean,
+    meditationTimeMax: number,
+    meditationFrom: number,
+    fromDay: string,
+  },
+
   meditationsBrief: MeditationBriefType[],
   meditationsData: {},
   meditations: MeditationType[],
@@ -25,13 +28,14 @@ export interface State {
 
 
 const persistentFields = [
-  'isSound',
-  'halfChartTop',
-  'halfChartBottom',
-  'meditationZones',
-  'meditationTimeMax',
-  'meditationFrom',
-  'fromDay',
+  // 'isSound',
+  // 'halfChartTop',
+  // 'halfChartBottom',
+  // 'meditationZones',
+  // 'meditationTimeMax',
+  // 'meditationFrom',
+  // 'fromDay',
+  'settings',
   'meditations',
   'meditationsBrief',
 ];

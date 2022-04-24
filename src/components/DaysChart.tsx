@@ -17,8 +17,8 @@ export default defineComponent({
     const width = clientWidth(); // 100% ширины
     const height = Math.max(clientHeight() / 3, 300); // 300 точек или 1/3 высоты экрана: что больше
 
-    const meditationZones = computed(() => store.state.meditationZones);
-    const fromDay = computed(() => store.state.fromDay);
+    const meditationZones = computed(() => store.state.settings.meditationZones);
+    const fromDay = computed(() => store.state.settings.fromDay);
 
     watch([days, meditationZones, fromDay], (val) => {
       // console.log('chartData: ', chartData);
@@ -38,7 +38,7 @@ export default defineComponent({
       // this.$refs.svgHistory.setAttribute('height', height);
       // console.log('chartData.length: ', chartData.length);
 
-      const chartFrom = store.state.halfChartTop ? 50 : 10; // если поставить 0, то будет с -10
+      const chartFrom = store.state.settings.halfChartTop ? 50 : 10; // если поставить 0, то будет с -10
       const chartTo = 100;
 
       const lineByIndicator = (name) => {
@@ -156,7 +156,7 @@ export default defineComponent({
         .attr('d', lineByIndicator('mins'));
 
       // isMeditationHigh
-      if (store.state.meditationZones) {
+      if (store.state.settings.meditationZones) {
         svg
           .append('path')
           .datum(chartData)
