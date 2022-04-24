@@ -19,6 +19,14 @@ export interface MeditationType {
   lastDataTime: number,
 }
 
+export interface MeditationBriefType {
+  name: string,
+  startTime: number,
+  durationTime: number,
+  meditationTime: number,
+  thresholdsData: {},
+}
+
 export interface MeditationDataType {
   d: number, // date
   m: number, // meditation

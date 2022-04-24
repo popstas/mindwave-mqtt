@@ -2,7 +2,7 @@ import { InjectionKey } from 'vue';
 import { createStore, Store } from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import { defaultState } from './defaultState';
-import { MeditationType, MeditationDataType, UserType } from '@/helpers/types';
+import { MeditationType, UserType, MeditationBriefType } from '@/helpers/types';
 
 export interface State {
   isSound: boolean,
@@ -12,6 +12,8 @@ export interface State {
   meditationTimeMax: number,
   meditationFrom: number,
   fromDay: string,
+  meditationsBrief: MeditationBriefType[],
+  meditationsData: {},
   meditations: MeditationType[],
 
   // not persistent
@@ -31,6 +33,7 @@ const persistentFields = [
   'meditationFrom',
   'fromDay',
   'meditations',
+  'meditationsBrief',
 ];
 
   // mutations с записью тупо значения в state

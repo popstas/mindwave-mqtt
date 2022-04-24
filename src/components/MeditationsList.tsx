@@ -45,16 +45,16 @@ export default defineComponent({
     } */
 
     const items = computed(() => {
-      return store.state.meditations.map(med => {
+      return store.state.meditationsBrief.map(med => {
         return {
-          meditationStart: med.meditationStart,
-          date: dateTimeFormat(med.meditationStart), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
+          meditationStart: med.startTime,
+          date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
           name: med.name, // TODO: <a title="click for load" href="javascript:" v-html="med.name" onClick={() => loadMeditation(med)}></a>,
-          time: mmss(med.meditationTime),
-          med70: Math.round(med.thresholdsData.meditation.thresholds[70].total / med.meditationTime * 100),
-          med80: Math.round(med.thresholdsData.meditation.thresholds[80].total / med.meditationTime * 100),
-          med90: Math.round(med.thresholdsData.meditation.thresholds[90].total / med.meditationTime * 100),
-          med100: Math.round(med.thresholdsData.meditation.thresholds[100].total / med.meditationTime * 100),
+          time: mmss(med.durationTime),
+          med70: Math.round(med.thresholdsData.meditation.thresholds[70].total / med.durationTime * 100),
+          med80: Math.round(med.thresholdsData.meditation.thresholds[80].total / med.durationTime * 100),
+          med90: Math.round(med.thresholdsData.meditation.thresholds[90].total / med.durationTime * 100),
+          med100: Math.round(med.thresholdsData.meditation.thresholds[100].total / med.durationTime * 100),
           med_avg: Math.round(med.thresholdsData.meditation.average),
           med70_mins: Math.round(med.thresholdsData.meditation.thresholds[70].total / 60 * 10) / 10,
           attention: Math.round(med.thresholdsData.attention.average),

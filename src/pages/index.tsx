@@ -5,11 +5,12 @@ import CurrentMeditation from '@/components/CurrentMeditation';
 import MeditationsList from '@/components/MeditationsList';
 import DaysList from '@/components/DaysList';
 import NoSleep from 'nosleep.js';
-import {mmss } from '@/helpers/utils';
+import { dateTimeFormat, mmss } from '@/helpers/utils';
 import { ElButton } from 'element-plus';
 import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
+import { MeditationBriefType, MeditationType } from '@/helpers/types';
 
 export default defineComponent({
   name: 'MainPage',
@@ -310,9 +311,24 @@ export default defineComponent({
 
 
 
+    function buildMeditationBrief() {
+      const brief = store.state.meditations.map(med => {
+        return meditationBrief(med);
+      });
+      store.commit('meditationsBrief', brief);
+    }
 
+    function meditationBrief(med: MeditationType) {
+      return {
+        name: med.name,
+        startTime: med.meditationStart,
+        durationTime: med.meditationTime,
+        thresholdsData: med.thresholdsData,
+      } as MeditationBriefType
+    }
 
     onMounted(() => {
+      buildMeditationBrief();
       // update mindwaveData
       setInterval(updateMindwaveData, 1000);
 
@@ -440,6 +456,7 @@ export default defineComponent({
       try {
         // console.log('add meditation to store.state.meditations');
         store.commit('meditations', sorted);
+        buildMeditationBrief();
       } catch (e) {
         alert('Not enough space for save meditation!');
       }
@@ -466,6 +483,7 @@ export default defineComponent({
 
     function removeMeditation(med) {
       store.commit('meditations', store.state.meditations.filter((m) => m.name !== med.name));
+      buildMeditationBrief();
     }
     
     function addHistory() {
