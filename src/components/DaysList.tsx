@@ -35,12 +35,12 @@ export default defineComponent({
           style={{width: '100%'}}
         >
           <ElTableColumn prop="day" label="day" sortable width="140" />
-          <ElTableColumn prop="med70avg" label="med70 avg" width="80"/>
-          <ElTableColumn prop="med80avg" label="med80 avg" width="80"/>
-          <ElTableColumn prop="med90avg" label="med90 avg" width="80"/>
-          <ElTableColumn prop="med70mins" label="med 70 mins" width="80"/>
-          <ElTableColumn prop="count" label="count" width="80"/>
-          <ElTableColumn prop="mins" label="mins" width="80"/>
+          <ElTableColumn prop="med70avg" label="med70 avg" sortable width="80"/>
+          <ElTableColumn prop="med80avg" label="med80 avg" sortable width="80"/>
+          <ElTableColumn prop="med90avg" label="med90 avg" sortable width="80"/>
+          <ElTableColumn prop="med70mins" label="med 70 mins" sortable width="80"/>
+          <ElTableColumn prop="count" label="count" sortable width="80"/>
+          <ElTableColumn prop="mins" label="mins" sortable width="80"/>
         </ElTable>
       </div>
     );
