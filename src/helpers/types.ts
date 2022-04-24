@@ -23,3 +23,10 @@ export interface MeditationDataType {
   m: number, // meditation
   a: number, // attention
 }
+
+export interface UserType {
+  uid: string,
+  photoURL?: string,
+  displayName?: string,
+  email?: string,
+}

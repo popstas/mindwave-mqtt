@@ -8,6 +8,7 @@ export const defaultState: State = {
   meditationFrom: 70,
   fromDay: '',
   meditations: [],
+  user: undefined,
 
   mindwaveUrl: 'http://localhost:9301/mindwave',
   // mindwaveUrl: 'https://test.home.popstas.ru/mindwave-test.php',

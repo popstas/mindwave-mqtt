@@ -2,7 +2,7 @@ import { InjectionKey } from 'vue';
 import { createStore, Store } from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import { defaultState } from './defaultState';
-import { MeditationType, MeditationDataType } from '@/helpers/types';
+import { MeditationType, MeditationDataType, UserType } from '@/helpers/types';
 
 export interface State {
   isSound: boolean,
@@ -14,6 +14,8 @@ export interface State {
   fromDay: string,
   meditations: MeditationType[],
 
+  // not persistent
+  user: UserType | undefined,
   mindwaveUrl: string,
   medLevels: Object,
   thresholdsFrequency: Object,
@@ -37,14 +39,17 @@ const persistentFields = [
     names.map((name) => {
       mutations[name] = (state: any, val: any) => {
         state[name] = val;
-        // console.log(`set state.${name}: ${val}`);
+        // console.log(`set state.${name}:`, val);
       };
     });
     return mutations;
   };
 
 
-const mutations = mutationFabric(persistentFields);
+const mutations = mutationFabric([
+  ...persistentFields,
+  'user',
+]);
 
 export const key: InjectionKey<Store<State>> = Symbol('store');
 

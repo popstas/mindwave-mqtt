@@ -9,6 +9,7 @@ import {mmss } from '@/helpers/utils';
 import { ElButton } from 'element-plus';
 import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
+import Profile from '@/components/Profile';
 
 export default defineComponent({
   name: 'MainPage',
@@ -544,6 +545,8 @@ export default defineComponent({
 
     return () => (
       <div>
+        <Profile></Profile>
+        
         <CurrentMeditation id="medCurrent" cur={cur} mindwaveData={mindwaveData}></CurrentMeditation>
         { cur.value.meditationCompare.name && (
           <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}></CurrentMeditation>
