@@ -33,26 +33,26 @@ export default defineComponent({
     return () => (
       <ElForm class="settings" label-width="120px">
         <ElFormItem label="Meditation time, sec">
-          <ElInput v-model={models['meditationTimeMax'].value}></ElInput>
+          <ElInput v-model={models['meditationTimeMax'].value}/>
         </ElFormItem>
         <ElFormItem label="Meditation threshold">
-          <ElInput v-model={models['meditationFrom'].value}></ElInput>
+          <ElInput v-model={models['meditationFrom'].value}/>
         </ElFormItem>
         <ElFormItem label="Show history from day">
-          <ElInput v-model={models['fromDay'].value}></ElInput>
+          <ElInput v-model={models['fromDay'].value}/>
         </ElFormItem>
 
         <ElFormItem label="Sound">
-          <ElCheckbox v-model={models['isSound'].value}></ElCheckbox>
+          <ElCheckbox v-model={models['isSound'].value}/>
         </ElFormItem>
         <ElFormItem label="Chart from 70%">
-          <ElCheckbox v-model={models['halfChartTop'].value}></ElCheckbox>
+          <ElCheckbox v-model={models['halfChartTop'].value}/>
         </ElFormItem>
         <ElFormItem label="Chart to 30%">
-          <ElCheckbox v-model={models['halfChartBottom'].value}></ElCheckbox>
+          <ElCheckbox v-model={models['halfChartBottom'].value}/>
         </ElFormItem>
         <ElFormItem label="Show zones">
-          <ElCheckbox v-model={models['meditationZones'].value}></ElCheckbox>
+          <ElCheckbox v-model={models['meditationZones'].value}/>
         </ElFormItem>
       </ElForm>
     );

@@ -1,7 +1,6 @@
 import useStore from "@/helpers/useStore";
-import { computed, defineComponent, PropType, ref, withKeys, withModifiers, emit } from "vue";
+import { computed, defineComponent } from "vue";
 import { ElTable, ElTableColumn } from "element-plus"
-import { MeditationType } from "@/helpers/types"
 import { dateTimeFormat, mmss } from "@/helpers/utils";
 
 export default defineComponent({

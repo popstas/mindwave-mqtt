@@ -57,14 +57,14 @@ export default defineComponent({
               label="Meditation" 
               name="meditation" 
               stats={cur.value?.thresholdsData?.meditation}
-            ></ValueStats>
+            />
 
             <ValueStats
               cur={cur.value}
               label="Attention" 
               name="attention" 
               stats={cur.value?.thresholdsData?.attention}
-            ></ValueStats>
+            />
 
             { cur.value?.meditationTime > 0 && (
               <div class="meditation-time">
@@ -74,7 +74,7 @@ export default defineComponent({
             )}
 
         <div>
-          <MeditationChart id={props.id} med={props.cur}></MeditationChart>
+          <MeditationChart id={props.id} med={props.cur} />
         </div>
 
         <div><ElInput
@@ -82,7 +82,7 @@ export default defineComponent({
           v-model={cur.value.name}
           placeholder="Name"
           /* style={{width: meditationNameWidth() + 'px'}} */
-        ></ElInput></div>
+        /></div>
       </div>
     );
   },

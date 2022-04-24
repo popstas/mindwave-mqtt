@@ -268,6 +268,6 @@ export default defineComponent({
         .attr('d', lineThreshold({ name: '100%', value: 100 }));
     }
 
-    return () => <svg id={props.id} width={width} height={height}></svg>;
+    return () => <svg id={props.id} width={width} height={height}/>;
   },
 });

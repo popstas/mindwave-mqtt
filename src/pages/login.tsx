@@ -61,9 +61,9 @@ export default defineComponent({
 
     return () => (
       <div>
-        <Profile></Profile>
+        <Profile/>
 
-        { !isLogged.value && <div id="firebaseui-auth-container"></div> }
+        { !isLogged.value && <div id="firebaseui-auth-container"/> }
       </div>
     );
   }

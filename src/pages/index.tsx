@@ -5,7 +5,7 @@ import CurrentMeditation from '@/components/CurrentMeditation';
 import MeditationsList from '@/components/MeditationsList';
 import DaysList from '@/components/DaysList';
 import NoSleep from 'nosleep.js';
-import { dateTimeFormat, mmss } from '@/helpers/utils';
+import { mmss } from '@/helpers/utils';
 import { ElButton } from 'element-plus';
 import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
@@ -593,11 +593,11 @@ export default defineComponent({
 
     return () => (
       <div>
-        <Profile></Profile>
+        <Profile/>
         
-        <CurrentMeditation id="medCurrent" cur={cur} mindwaveData={mindwaveData}></CurrentMeditation>
+        <CurrentMeditation id="medCurrent" cur={cur} mindwaveData={mindwaveData}/>
         { cur.value.meditationCompare.name && (
-          <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}></CurrentMeditation>
+          <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}/>
         )}
 
         <ElButton onClick={startMeditation}>{cur.value.state === 'started' ? 'Stop' : 'Start'}</ElButton>
@@ -605,16 +605,16 @@ export default defineComponent({
 
         <ElButton onClick={syncMeditations}>From DB</ElButton>
 
-        <Settings></Settings>
+        <Settings/>
 
-        <DaysChart id="daysChart" days={days}></DaysChart>
+        <DaysChart id="daysChart" days={days}/>
 
         <MeditationsList
           onLoad={loadMeditation}
           onRemove={removeMeditation}
           onCompare={compareMeditation}
-        ></MeditationsList>
-        <DaysList days={days}></DaysList>
+        />
+        <DaysList days={days}/>
         <ElButton onClick={convertMeditations}>Convert med</ElButton>
         <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>
       </div>

@@ -1,7 +1,6 @@
 import { ElLink } from 'element-plus';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { store } from '@/store';
-import firebase from 'firebase/compat';
 
 import useFirebaseApp from '@/helpers/useFirebaseApp';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';

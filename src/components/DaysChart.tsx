@@ -1,4 +1,4 @@
-import { defineComponent, computed, PropType, toRefs, onMounted, watch } from 'vue';
+import { defineComponent, computed, toRefs, watch } from 'vue';
 import useStore from '@/helpers/useStore';
 import { clientWidth, clientHeight } from '@/helpers/utils'
 import * as d3 from 'd3'
@@ -228,6 +228,6 @@ export default defineComponent({
         .attr('d', lineByIndicator('med70avg'));
     }
 
-    return () => <svg id={props.id} width={width} height={height}></svg>;
+    return () => <svg id={props.id} width={width} height={height}/>;
   },
 });

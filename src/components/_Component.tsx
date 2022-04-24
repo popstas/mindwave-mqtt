@@ -9,7 +9,7 @@ export default defineComponent({
     // const store = useStore();
 
     return () => (
-      <div></div>
+      <div/>
     );
   },
 });

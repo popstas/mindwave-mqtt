@@ -1,5 +1,5 @@
 import useFirebaseApp from '@/helpers/useFirebaseApp';
-import { getDatabase, onValue } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 import { store } from '@/store';
 import { ref, set, get, remove, DatabaseReference } from '@firebase/database';
 

@@ -13,7 +13,6 @@ export default function useFirebaseApp() {
     appId: "1:478356403956:web:90860a12d7ea90480a10a1",
     measurementId: "G-YJ8MXR825S"
   };
-  const app = initializeApp(firebaseConfig);
   // const analytics = getAnalytics(app);
-  return app;
+  return initializeApp(firebaseConfig);
 }

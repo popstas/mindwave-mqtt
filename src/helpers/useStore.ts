@@ -1,6 +1,6 @@
 import { useStore as baseUseStore } from "vuex";
 import { key } from "@/store";
-import { MutationDataTypes } from "@/store/mutations";
+// import { MutationDataTypes } from "@/store/mutations";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function useStore() {
