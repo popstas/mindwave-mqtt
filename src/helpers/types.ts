@@ -23,7 +23,6 @@ export interface MeditationBriefType {
   name: string,
   startTime: number,
   durationTime: number,
-  meditationTime: number,
   thresholdsData: {},
 }
 

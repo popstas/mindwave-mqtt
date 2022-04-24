@@ -11,6 +11,7 @@ import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
 import { MeditationBriefType, MeditationType } from '@/helpers/types';
+import { dbGet, dbRemove, dbSet } from '@/helpers/firebaseDb';
 
 export default defineComponent({
   name: 'MainPage',
@@ -102,8 +103,8 @@ export default defineComponent({
       let minDate: number, maxDate: number;
 
       // собирает days
-      store.state.meditations.forEach((med) => {
-        const day = dayFormat(med.meditationStart - 6 * 3600 * 1000); // до 6 утра считаем за вчера
+      store.state.meditationsBrief.forEach((med) => {
+        const day = dayFormat(med.startTime - 6 * 3600 * 1000); // до 6 утра считаем за вчера
         const date = new Date(day).getTime();
         // TODO: add type
         const ds = days[day] || {
@@ -128,7 +129,7 @@ export default defineComponent({
 
         // поля дня
         ds.count++;
-        ds.time += med.meditationTime;
+        ds.time += med.durationTime;
         for (let t of [70, 80, 90, 100]) {
           // med70total
           const key = 'med' + t + 'total';
@@ -311,13 +312,7 @@ export default defineComponent({
 
 
 
-    function buildMeditationBrief() {
-      const brief = store.state.meditations.map(med => {
-        return meditationBrief(med);
-      });
-      store.commit('meditationsBrief', brief);
-    }
-
+    // TODO: remove
     function meditationBrief(med: MeditationType) {
       return {
         name: med.name,
@@ -327,8 +322,33 @@ export default defineComponent({
       } as MeditationBriefType
     }
 
+    // TODO: on app load
+    function syncMeditations() {
+      dbGet('meditations', meds => {
+        console.log('Update meditations from firebase:', meds);
+        store.commit('meditationsBrief', meds);
+      });
+    }
+
+    // TODO: remove
+    function convertMeditations() {
+      const brief = store.state.meditations.map(med => {
+        return meditationBrief(med);
+      });
+      dbSet('meditations', brief);
+      store.commit('meditationsBrief', brief);
+    }
+
+    // TODO: remove
+    function sendMeditationsData() {
+      const data = {};
+      for (const med of store.state.meditations) {
+        data[med.meditationStart] = med.history;
+      }
+      dbSet('meditationsData', data);
+    }
+
     onMounted(() => {
-      buildMeditationBrief();
       // update mindwaveData
       setInterval(updateMindwaveData, 1000);
 
@@ -438,42 +458,46 @@ export default defineComponent({
     function saveMeditation() {
       const d = new Date(cur.value.meditationStart).toISOString().replace('T', ' ').substring(0, 16);
       const name = cur.value.name || `${d}: ${mmss(cur.value.meditationTime)}`;
-      const med = {
+      const med: MeditationBriefType = {
         name: name,
-        history: cur.value.history, // TODO: слишком тяжёлые данные, надо сохранять отдельно
+        // history: cur.value.history, // слишком тяжёлые данные, надо сохранять отдельно
+        startTime: cur.value.meditationStart,
+        durationTime: cur.value.meditationTime,
         thresholdsData: cur.value.thresholdsData,
-        meditationStart: cur.value.meditationStart,
-        meditationTime: cur.value.meditationTime,
       };
 
       console.log('med: ', med);
-      const meds = [...store.state.meditations, med];
+      const meds = [...store.state.meditationsBrief, med];
       const sorted = meds.sort((b, a) => {
-        if (a.meditationStart > b.meditationStart) return 1;
-        if (a.meditationStart < b.meditationStart) return -1;
+        if (a.startTime > b.startTime) return 1;
+        if (a.startTime < b.startTime) return -1;
         return 0;
       });
       try {
         // console.log('add meditation to store.state.meditations');
-        store.commit('meditations', sorted);
-        buildMeditationBrief();
+        store.commit('meditationsBrief', sorted);
+        dbSet('meditations', sorted);
+        dbSet(`meditationsData/${med.startTime}`, cur.value.history);
       } catch (e) {
         alert('Not enough space for save meditation!');
       }
     }
 
-    function loadMeditation(med) {
+    function loadMeditation(med: MeditationBriefType) {
       // console.log('load meditation: ', med);
-      cur.value.history = med.history;
+      dbGet(`meditationsData/${med.startTime}`, history => {
+        cur.value.history = history;
+      });
+      // cur.value.history = med.history;
       cur.value.thresholdsData = med.thresholdsData;
-      cur.value.meditationStart = med.meditationStart;
-      cur.value.meditationTime = med.meditationTime;
+      cur.value.meditationStart = med.startTime;
+      cur.value.meditationTime = med.durationTime;
       cur.value.name = med.name;
       drawChart();
       window.scrollTo(0, 0);
     }
 
-    function compareMeditation(med) {
+    function compareMeditation(med: MeditationBriefType) {
       if (med.name === cur.value.meditationCompare.name) cur.value.meditationCompare = {};
       else {
         cur.value.meditationCompare = med;
@@ -481,9 +505,11 @@ export default defineComponent({
       }
     }
 
-    function removeMeditation(med) {
-      store.commit('meditations', store.state.meditations.filter((m) => m.name !== med.name));
-      buildMeditationBrief();
+    function removeMeditation(med: MeditationBriefType) {
+      const removed = store.state.meditationsBrief.filter((m) => m.name !== med.name);
+      store.commit('meditationsBrief', removed);
+      dbSet('meditations', removed)
+      dbRemove(`meditationsData/${med.startTime}`);
     }
     
     function addHistory() {
@@ -577,6 +603,8 @@ export default defineComponent({
         <ElButton onClick={startMeditation}>{cur.value.state === 'started' ? 'Stop' : 'Start'}</ElButton>
         {cur.value.state === 'stop' && <ElButton onClick={saveMeditation}>Save</ElButton>}
 
+        <ElButton onClick={syncMeditations}>From DB</ElButton>
+
         <Settings></Settings>
 
         <DaysChart id="daysChart" days={days}></DaysChart>
@@ -587,6 +615,8 @@ export default defineComponent({
           onCompare={compareMeditation}
         ></MeditationsList>
         <DaysList days={days}></DaysList>
+        <ElButton onClick={convertMeditations}>Convert med</ElButton>
+        <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>
       </div>
     );
   },

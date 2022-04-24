@@ -13,8 +13,8 @@ export default defineComponent({
     const store = useStore();
 
     function getMeditationByRow(row) {
-      return store.state.meditations.find(m => {
-        return m?.meditationStart == row?.meditationStart
+      return store.state.meditationsBrief.find(m => {
+        return m?.startTime === row?.startTime
       });
     }
     function onCellClick(row, column, cell, event) {
@@ -47,7 +47,7 @@ export default defineComponent({
     const items = computed(() => {
       return store.state.meditationsBrief?.map(med => {
         return {
-          meditationStart: med.startTime,
+          startTime: med.startTime,
           date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
           name: med.name, // TODO: <a title="click for load" href="javascript:" v-html="med.name" onClick={() => loadMeditation(med)}></a>,
           time: mmss(med.durationTime),

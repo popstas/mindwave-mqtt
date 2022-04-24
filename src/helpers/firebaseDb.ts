@@ -1,7 +1,7 @@
 import useFirebaseApp from '@/helpers/useFirebaseApp';
 import { getDatabase, onValue } from 'firebase/database';
 import { store } from '@/store';
-import { ref, set, get, child, DatabaseReference } from '@firebase/database';
+import { ref, set, get, remove, DatabaseReference } from '@firebase/database';
 
 const app = useFirebaseApp();
 const db = getDatabase(app);
@@ -30,4 +30,15 @@ export function dbSet(path: string | DatabaseReference, data: {}) {
     ref(db, `users/${store.state.user.uid}/${path}`) :
     path;
   return set(dbRef, data);
+}
+
+export function dbRemove(path: string | DatabaseReference) {
+  if (!store.state.user) {
+    return undefined;
+  }
+
+  const dbRef = typeof path === 'string' ?
+    ref(db, `users/${store.state.user.uid}/${path}`) :
+    path;
+  return remove(dbRef);
 }
