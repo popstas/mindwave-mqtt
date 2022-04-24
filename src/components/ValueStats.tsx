@@ -1,5 +1,5 @@
 import { defineComponent, toRefs } from "vue";
-import { mmss, percentClass } from '@/helpers/utils'
+import { mmss, percentClass, timePercent } from '@/helpers/utils'
 
 export default defineComponent({
   name: "ValueStats",
@@ -12,11 +12,6 @@ export default defineComponent({
   setup(props) {
     const { cur, stats, name, label } = toRefs(props);
 
-    function timePercent(time: number) {
-      const val = Math.round((time / cur.value?.meditationTime) * 100);
-      return `${val}%`;
-    }
-
     function outThresholds() {
       const items = [];
       for (let val in stats.value?.thresholds) {
@@ -27,8 +22,8 @@ export default defineComponent({
             <td class="value">
               <span>{ mmss(th.total) }</span>&nbsp;
               { th.total > 0 && (
-                <span class={'percent ' + percentClass(timePercent(th.total), `${name.value}${val}`)}>
-                  ({ timePercent(th.total) })
+                <span class={'percent ' + percentClass(timePercent(th.total, cur.value?.meditationTime), `${name.value}${val}`)}>
+                  ({ timePercent(th.total, cur.value?.meditationTime) })
                 </span>
               )}
               { th.maxTime && ( <span class="max" >, max: { mmss(th.maxTime) }</span> ) }

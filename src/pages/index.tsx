@@ -54,6 +54,7 @@ export default defineComponent({
       meditationCompare: false,
       state: 'idle',
       isPlay: false,
+      lastDataTime: 0,
     });
 
     // TODO: define type
@@ -91,6 +92,7 @@ export default defineComponent({
     const attention = computed(() => mindwaveData.value.attention);
     const signal = computed(() => mindwaveData.value.signal);
     const isSound = computed(() => store.state.isSound);
+    const lastDataTime = computed(() => cur.value.lastDataTime);
 
     const days = computed(() => {
       const days = {};
@@ -191,13 +193,35 @@ export default defineComponent({
     });
 
 
+    // update from server
+    async function updateMindwaveData() {
+      const headers = new Headers();
 
+      try {
+        const response = await fetch(store.state.mindwaveUrl, {
+          headers: headers,
+        });
 
+        const data = await response.json();
 
+        // console.log('mindwaveData: ', mindwaveData);
+        let changed = [];
+        for (let name in data) {
+          // console.log(`mindwaveData[${name}]:`, mindwaveData.value[name]);
+          const isChanged = mindwaveData.value[name] === parseInt(data[name]);
+          if (isChanged) changed.push(name);
+          mindwaveData.value[name] = parseInt(data[name]);
+        }
 
-    // watch
-    watch(meditation, (val, prev) => {
-      // console.log(`watch meditation`, val);
+        // only if data changes, remove it for every second tick
+        if (changed.length > 0) cur.value.lastDataTime = Date.now();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    function updateMeditation(val) {
+      console.log(`watch meditation, tick: ${cur.value.tick}, val: `, val);
 
       // started meditation
       if (!cur.value.meditationStart || cur.value.state === 'stop') return;
@@ -247,6 +271,12 @@ export default defineComponent({
       ) {
         stopMeditation();
       }
+    }
+
+    // watch
+    // watch(meditation, updateMeditation);
+    watch(lastDataTime, (val) => {
+      updateMeditation(mindwaveData.value.meditation);
     });
 
     watch(attention, (val, prev) => {
@@ -259,7 +289,7 @@ export default defineComponent({
       let freq = Math.min(val * 5, 200);
       // console.log('sig freq: ', freq);
       oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  });
+    });
 
     watch(isSound, (val, prev) => {
       if (cur.value.isPlay) {
@@ -284,21 +314,7 @@ export default defineComponent({
 
     onMounted(() => {
       // update mindwaveData
-      setInterval(async () => {
-        const headers = new Headers();
-
-        const response = await fetch(store.state.mindwaveUrl, {
-          headers: headers,
-        });
-
-        const data = await response.json();
-
-        // console.log('mindwaveData: ', mindwaveData);
-        for (let name in data) {
-          // console.log(`mindwaveData[${name}]:`, mindwaveData.value[name]);
-          mindwaveData.value[name] = parseInt(data[name]);
-        }
-      }, 1000);
+      setInterval(updateMindwaveData, 1000);
 
       // init app
       setTimeout(async () => {
@@ -326,13 +342,6 @@ export default defineComponent({
 
 
 
-
-    // computed
-    /* const meditationNameWidth = computed(() => {
-      const padding = 3; // paddings and close button
-      const width = (cur.meditationName.length + 1) * 8 + padding;
-      return Math.max(50, width);
-    }); */
 
 
 
@@ -379,11 +388,6 @@ export default defineComponent({
       if (!cur.value.isPlay) return;
       cur.value.isPlay = false;
       if (store.state.isSound) oscillator.disconnect(audioCtx.destination);
-    }
-
-    function timePercent(time: number) {
-      const val = Math.round((time / cur.value.meditationTime) * 100);
-      return `${val}%`;
     }
 
     function startMeditation() {

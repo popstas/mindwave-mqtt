@@ -16,6 +16,7 @@ export interface MeditationType {
   meditationCompare: {},
   state: string,
   isPlay: boolean, // TODO: to store
+  lastDataTime: number,
 }
 
 export interface MeditationDataType {

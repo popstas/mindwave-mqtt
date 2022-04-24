@@ -41,6 +41,11 @@ export function percentClass(str: string, type: string) {
   return '';
 }
 
+export function timePercent(time: number, totalTime: number) {
+  const val = Math.round((time / totalTime) * 100);
+  return `${val}%`;
+}
+
 export function clientWidth() {
   if (import.meta.env.SSR) return 0;
   return window.innerWidth > 0 ? window.innerWidth : screen.width;
