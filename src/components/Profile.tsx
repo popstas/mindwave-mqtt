@@ -42,12 +42,13 @@ export default defineComponent({
     const user = computed(() => store.state.user);
 
     // TODO: move to App?
-    function syncData(data, dataRef) {
-      if (!data.settings) data.settings = {};
+    function syncSettings(settings?: object, settingsRef) {
+      if (!settings) settings = {};
+      console.log("settings:", settings);
       let isChanged = false;
 
       for (const name of settingsNames) {
-        const remote = data.settings[name];
+        const remote = settings[name];
         const local = store.state[name];
         if (remote !== undefined) {
           if (remote !== local) {
@@ -56,13 +57,13 @@ export default defineComponent({
           }
         } else {
           isChanged = true;
-          data.settings[name] = local;
+          settings[name] = local;
         }
       }
 
       if (isChanged) {
-        console.log("update data:", data);
-        set(dataRef, data);
+        console.log("update settings:", settings);
+        set(settingsRef, settings);
       }
     }
 
@@ -88,12 +89,12 @@ export default defineComponent({
       if (!user.email) return;
 
       // https://firebase.google.com/docs/database/web/read-and-write
-      const dataRef = dbref(db, "users/" + store.state.user.uid);
-      onValue(dataRef, snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          console.log('Update data from firebase');
-          syncData(data, dataRef);
+      const settingsRef = dbref(db, "users/" + store.state.user.uid + "/settings");
+      onValue(settingsRef, snapshot => {
+        const settings = snapshot.val();
+        if (settings) {
+          console.log('Update settings from firebase');
+          syncSettings(settings, settingsRef);
         }
       });
     }

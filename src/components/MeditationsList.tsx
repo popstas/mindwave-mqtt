@@ -45,7 +45,7 @@ export default defineComponent({
     } */
 
     const items = computed(() => {
-      return store.state.meditationsBrief.map(med => {
+      return store.state.meditationsBrief?.map(med => {
         return {
           meditationStart: med.startTime,
           date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
