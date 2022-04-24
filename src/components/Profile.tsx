@@ -4,9 +4,8 @@ import { store } from '@/store';
 import firebase from 'firebase/compat';
 
 import useFirebaseApp from '@/helpers/useFirebaseApp';
-import { getDatabase, onValue } from 'firebase/database';
-import { ref as dbref, set } from '@firebase/database';
 import { getAuth } from 'firebase/auth';
+import { dbGet, dbSet } from '@/helpers/firebaseDb';
 
 export default defineComponent({
   name: 'Profile',
@@ -14,7 +13,6 @@ export default defineComponent({
   setup(props) {
     const app = useFirebaseApp();
     const auth = getAuth(app);
-    const db = getDatabase(app);
     const settingsNames = [
       'isSound',
       'halfChartTop',
@@ -43,8 +41,8 @@ export default defineComponent({
 
     // TODO: move to App?
     function syncSettings(settings?: object, settingsRef) {
+      console.log('Update settings from firebase:', settings);
       if (!settings) settings = {};
-      console.log("settings:", settings);
       let isChanged = false;
 
       for (const name of settingsNames) {
@@ -63,7 +61,7 @@ export default defineComponent({
 
       if (isChanged) {
         console.log("update settings:", settings);
-        set(settingsRef, settings);
+        dbSet(settingsRef, settings);
       }
     }
 
@@ -89,14 +87,7 @@ export default defineComponent({
       if (!user.email) return;
 
       // https://firebase.google.com/docs/database/web/read-and-write
-      const settingsRef = dbref(db, "users/" + store.state.user.uid + "/settings");
-      onValue(settingsRef, snapshot => {
-        const settings = snapshot.val();
-        if (settings) {
-          console.log('Update settings from firebase');
-          syncSettings(settings, settingsRef);
-        }
-      });
+      dbGet('settings', syncSettings);
     }
 
     onMounted(() => {
