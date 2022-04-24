@@ -9,7 +9,7 @@
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx,vue}\" --quiet",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc --noEmit && vite build",
-    "build-dev": "vite build",
+    "build-dev": "vite build --base=/dist",
     "build-pkg": "pkg . --out-path dist",
     "build:client": "vite build --outDir dist/client --ssrManifest",
     "build:server": "vite build --outDir dist/server --ssr src/entry-server",

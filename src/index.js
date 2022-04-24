@@ -115,6 +115,29 @@ function createViteExpress() {
   })
 }
 
+/*async function createViteServerNoSSR(
+  app = null,
+  root = process.cwd(),
+  isProd = process.env.NODE_ENV === 'production'
+) {
+  if (!app) app = express()
+  vite = await require('vite').createServer({
+    root,
+    logLevel: isTest ? 'error' : 'info',
+    server: {
+      watch: {
+        // During tests we edit the files too fast and sometimes chokidar
+        // misses change events, so enforce polling for consistency
+        usePolling: true,
+        interval: 100
+      }
+    }
+  })
+  // use vite's connect instance as middleware
+  app.use(vite.middlewares);
+  return { app, vite }
+}*/
+
 // https://vitejs.dev/guide/ssr.html#setting-up-the-dev-server
 async function createViteServerSSR(
   app = null,
@@ -275,7 +298,7 @@ async function expressInit() {
     res.json(lastData);
   });
 
-  app.use('/dist', express.static('dist/client'));
+  app.use('/dist', express.static('dist'));
 
   app.use('/old', express.static('public'));
 
