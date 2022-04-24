@@ -4,7 +4,7 @@ import { store } from '@/store';
 import firebase from 'firebase/compat';
 
 import useFirebaseApp from '@/helpers/useFirebaseApp';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { dbGet, dbSet } from '@/helpers/firebaseDb';
 
 export default defineComponent({
@@ -65,10 +65,35 @@ export default defineComponent({
       }
     }
 
+    function loginPopup() {
+      // without firebaseui
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        'login_hint': 'popstas@gmail.com' // TODO: to localstorage
+      });
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken;
+          // The signed-in user info.
+          const user = result.user;
+          console.log("logged user popup:", user);
+        }).catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+      });
+    }
+
     function logout(){
-      firebase.auth().signOut();
+      signOut(auth);
       isLogged.value = false;
-      store.dispatch('user', undefined);
+      store.commit('user', undefined);
     }
 
     function setUser(user) {
@@ -99,7 +124,7 @@ export default defineComponent({
           <a class="profile-logout" title="Click to logout" onClick={logout} href="#">{ user.value.email }</a>
         )}
         { !isLogged.value && (
-          <ElLink class="profile-login" href="/login">Login</ElLink>
+          <ElLink class="profile-login" onClick={loginPopup}>Login</ElLink>
         )}
       </div>
     );
