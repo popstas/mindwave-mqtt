@@ -21,6 +21,14 @@ export default defineComponent({
       return Math.max(50, width);
     }
 
+    // computed
+    /* const meditationNameWidth = computed(() => {
+      const padding = 3; // paddings and close button
+      const width = (cur.meditationName.length + 1) * 8 + padding;
+      return Math.max(50, width);
+    }); */
+
+
     return () => (
       <div class="current-meditation">
         <div class="main-values">

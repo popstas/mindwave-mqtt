@@ -44,4 +44,5 @@ npm run dev # vite app
 - D3.js
 
 ### TODO
+- vite-plugin-vue-layouts
 - Meditation tags
