@@ -22,8 +22,13 @@ export interface State {
   // not persistent
   user: UserType | undefined,
   mindwaveUrl: string,
-  medLevels: Object,
-  thresholdsFrequency: Object,
+  medLevels: {
+    low: number,
+    high: number,
+  },
+  thresholdsFrequency: {
+    [key: number]: number
+  },
 }
 
 

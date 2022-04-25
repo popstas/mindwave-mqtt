@@ -3,6 +3,26 @@ import { computed, defineComponent } from "vue";
 import { ElTable, ElTableColumn } from "element-plus"
 import { dateTimeFormat, mmss, percentClass } from '@/helpers/utils';
 
+interface MedRowType {
+  startTime: number,
+  date: string,
+  name: string,
+  time: string,
+  med70: number,
+  med80: number,
+  med90: number,
+  med100: number,
+  med_avg: number,
+  med70_mins: number,
+  attention: number,
+  compare: 'compare',
+  remove: 'x',
+}
+
+interface ColumnType {
+  property: string,
+}
+
 export default defineComponent({
   name: "MeditationsList",
   props: {},
@@ -11,17 +31,18 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
 
-    function getMeditationByRow(row) {
+    function getMeditationByRow(row: MedRowType) {
       return store.state.meditationsBrief.find(m => {
-        return m?.startTime === row?.startTime
+        return m.startTime === row.startTime
       });
     }
-    function onCellClick(row, column, cell, event) {
+    function onCellClick(row: MedRowType, column: ColumnType) {
       let actionMap = {
         name: 'load',
         compare: 'compare',
         remove: 'remove',
       };
+
       const action = actionMap[column.property];
       if (!action) return;
 
@@ -30,31 +51,18 @@ export default defineComponent({
       context.emit(action, med);
     }
 
-    function medColFormatter(row, column) {
+    function medColFormatter(row: MedRowType, column: ColumnType) {
       const val = row[column.property];
       const cl = percentClass(val, column.property);
       return (<div class={cl}>{val}</div>)
     }
-
-    /* function tableRowClassName({ row, rowIndex }: {
-      row: any
-      rowIndex: number
-    }) {
-      console.log('row: ', row);
-      if (rowIndex === 1) {
-        return 'warning-row'
-      } else if (rowIndex === 3) {
-        return 'success-row'
-      }
-      return ''
-    } */
 
     const items = computed(() => {
       return store.state.meditationsBrief?.map(med => {
         return {
           startTime: med.startTime,
           date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
-          name: med.name, // TODO: <a title="click for load" href="javascript:" v-html="med.name" onClick={() => loadMeditation(med)}></a>,
+          name: med.name,
           time: mmss(med.durationTime),
           med70: Math.round(med.thresholdsData.meditation.thresholds[70].total / med.durationTime * 100),
           med80: Math.round(med.thresholdsData.meditation.thresholds[80].total / med.durationTime * 100),
@@ -64,13 +72,8 @@ export default defineComponent({
           med70_mins: Math.round(med.thresholdsData.meditation.thresholds[70].total / 60 * 10) / 10,
           attention: Math.round(med.thresholdsData.attention.average),
           compare: 'compare',
-          remove: 'x',/*(
-            <div class="med__actions">
-              <a href="javascript:" onClick={() => compareMeditation(med)}>compare</a>
-              <a href="javascript:" onClick={() => removeMeditation(med)}>x</a>
-            </div>
-          ),*/
-        }
+          remove: 'x',
+        } as MedRowType
       });
     });
 
@@ -84,7 +87,6 @@ export default defineComponent({
           default-sort={{ prop: 'date', order: 'descending' }}
           style={{width: '100%'}}
           onCell-click={onCellClick}
-          /* row-class-name={tableRowClassName} */
         >
           <ElTableColumn prop="date" label="Date" sortable width="150" />
           <ElTableColumn prop="name" label="Name" sortable className="clickable" />

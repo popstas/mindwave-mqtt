@@ -10,22 +10,30 @@ import { ElButton } from 'element-plus';
 import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
-import { MeditationBriefType, MeditationType } from '@/helpers/types';
+import { MeditationBriefType, ThresholdsDataType } from '@/helpers/types';
 import { dbGet, dbRemove, dbSet } from '@/helpers/firebaseDb';
+
+interface NoSleepType {
+  enable: () => any,
+  disable: () => any,
+}
 
 export default defineComponent({
   name: 'MainPage',
   setup(props, context) {
     const store = useStore();
 
-    let nosleep;
+    let nosleep: NoSleepType;
     if (!import.meta.env.SSR) nosleep = new NoSleep();
-    else nosleep = {enable: () => {}, disable: () => {}}
+    else nosleep = {
+      enable: () => new Promise(()=>{}),
+      disable: () => {},
+    }
     // console.log('store:', store);
     // console.log('props:', props);
 
     // sound
-    let audioCtx; // should be inited later, not here
+    let audioCtx: AudioContext; // should be inited later, not here
     let oscillator: OscillatorNode; // for audioInit
 
 
@@ -48,7 +56,7 @@ export default defineComponent({
       meditationStart: Date.now(),
       meditationTime: 0,
       history: [],
-      thresholdsData: {},
+      thresholdsData: {} as ThresholdsDataType,
       name: '',
       tick: 0,
       totalSum: 0,
@@ -84,7 +92,7 @@ export default defineComponent({
     const thresholds = computed(() => {
       const thresholds = [70, 80, 90, 100];
       if (!thresholds.includes(store.state.settings.meditationFrom)) {
-        thresholds.push(parseInt(store.state.settings.meditationFrom));
+        thresholds.push(store.state.settings.meditationFrom);
         return thresholds.sort();
       }
       return thresholds;
@@ -313,14 +321,14 @@ export default defineComponent({
 
 
     // TODO: remove
-    function meditationBrief(med: MeditationType) {
+    /*function meditationBrief(med: MeditationType) {
       return {
         name: med.name,
         startTime: med.meditationStart,
         durationTime: med.meditationTime,
         thresholdsData: med.thresholdsData,
       } as MeditationBriefType
-    }
+    }*/
 
     // TODO: on app load
     function syncMeditations() {
@@ -331,22 +339,22 @@ export default defineComponent({
     }
 
     // TODO: remove
-    function convertMeditations() {
+    /*function convertMeditations() {
       const brief = store.state.meditations.map(med => {
         return meditationBrief(med);
       });
       dbSet('meditations', brief);
       store.commit('meditationsBrief', brief);
-    }
+    }*/
 
     // TODO: remove
-    function sendMeditationsData() {
+    /*function sendMeditationsData() {
       const data = {};
       for (const med of store.state.meditations) {
         data[med.meditationStart] = med.history;
       }
       dbSet('meditationsData', data);
-    }
+    }*/
 
     onMounted(() => {
       // update mindwaveData
@@ -437,7 +445,7 @@ export default defineComponent({
       cur.value.state = 'started';
       cur.value.meditationStart = Date.now();
       cur.value.history = [];
-      cur.value.thresholdsData = {};
+      cur.value.thresholdsData = {} as ThresholdsDataType;
       cur.value.tick = 0;
       cur.value.totalSum = 0;
 
@@ -511,7 +519,7 @@ export default defineComponent({
       dbSet('meditations', removed)
       dbRemove(`meditationsData/${med.startTime}`);
     }
-    
+
     function addHistory() {
       const data = {
         d: Date.now(),
@@ -521,7 +529,9 @@ export default defineComponent({
       cur.value.history.push(data);
     }
 
-    function processThresholds({ field, value }) {
+    function processThresholds({ field, value }: {
+      field: 'meditation' | 'attention', value: number
+    }) {
       if (!cur.value.thresholdsData[field]) {
         cur.value.thresholdsData[field] = {
           totalSum: 0,
@@ -537,6 +547,7 @@ export default defineComponent({
           cur.value.thresholdsData[field].thresholds[threshold] = {
             total: 0,
             loses: 0,
+            start: 0,
           };
         }
 
@@ -594,7 +605,7 @@ export default defineComponent({
     return () => (
       <div>
         <Profile/>
-        
+
         <CurrentMeditation id="medCurrent" cur={cur} mindwaveData={mindwaveData}/>
         { cur.value.meditationCompare.name && (
           <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}/>
@@ -615,8 +626,8 @@ export default defineComponent({
           onCompare={compareMeditation}
         />
         <DaysList days={days}/>
-        <ElButton onClick={convertMeditations}>Convert med</ElButton>
-        <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>
+        {/*<ElButton onClick={convertMeditations}>Convert med</ElButton>
+        <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>*/}
       </div>
     );
   },

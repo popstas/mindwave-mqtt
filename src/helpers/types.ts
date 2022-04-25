@@ -19,11 +19,35 @@ export interface MeditationType {
   lastDataTime: number,
 }
 
+interface ThresholdsType {
+  [key: number]: {
+    total: number,
+    loses: number,
+    start: number,
+    maxTime: number,
+  }
+}
+
+export interface ThresholdsDataType {
+  meditation: {
+    totalSum: number,
+    tick: number
+    average: number,
+    thresholds: ThresholdsType
+  },
+  attention: {
+    totalSum: number,
+    tick: number
+    average: number,
+    thresholds: ThresholdsType
+  },
+}
+
 export interface MeditationBriefType {
   name: string,
   startTime: number,
   durationTime: number,
-  thresholdsData: {},
+  thresholdsData: ThresholdsDataType,
 }
 
 export interface MeditationDataType {
