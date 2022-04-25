@@ -1,7 +1,7 @@
 import useStore from "@/helpers/useStore";
 import { computed, defineComponent } from "vue";
 import { ElTable, ElTableColumn } from "element-plus"
-import { dateTimeFormat, mmss } from "@/helpers/utils";
+import { dateTimeFormat, mmss, percentClass } from '@/helpers/utils';
 
 export default defineComponent({
   name: "MeditationsList",
@@ -28,6 +28,12 @@ export default defineComponent({
       const med = getMeditationByRow(row);
       // console.log(`MeditationsList: emit: ${action}`);
       context.emit(action, med);
+    }
+
+    function medColFormatter(row, column) {
+      const val = row[column.property];
+      const cl = percentClass(val, column.property);
+      return (<div class={cl}>{val}</div>)
     }
 
     /* function tableRowClassName({ row, rowIndex }: {
@@ -81,17 +87,17 @@ export default defineComponent({
           /* row-class-name={tableRowClassName} */
         >
           <ElTableColumn prop="date" label="Date" sortable width="150" />
-          <ElTableColumn prop="name" label="Name" sortable/>
+          <ElTableColumn prop="name" label="Name" sortable className="clickable" />
           <ElTableColumn prop="time" label="Time" sortable width="50"/>
-          <ElTableColumn prop="med70" label="Med70" sortable width="65"/>
-          <ElTableColumn prop="med80" label="Med80" sortable width="65"/>
-          <ElTableColumn prop="med90" label="Med90" sortable width="65"/>
-          <ElTableColumn prop="med100" label="Med100" sortable width="67"/>
-          <ElTableColumn prop="med_avg" label="Med avg" sortable width="63"/>
-          <ElTableColumn prop="med70_mins" label="Med70 mins" sortable width="65"/>
+          <ElTableColumn prop="med70" label="Med70" sortable width="65" formatter={medColFormatter}/>
+          <ElTableColumn prop="med80" label="Med80" sortable width="65" formatter={medColFormatter}/>
+          <ElTableColumn prop="med90" label="Med90" sortable width="65" formatter={medColFormatter}/>
+          <ElTableColumn prop="med100" label="Med100" sortable width="67" formatter={medColFormatter}/>
+          <ElTableColumn prop="med_avg" label="Med avg" sortable width="63" formatter={medColFormatter}/>
+          <ElTableColumn prop="med70_mins" label="Med70 mins" sortable width="65" formatter={medColFormatter}/>
           <ElTableColumn prop="attention" label="Att" sortable width="65"/>
-          <ElTableColumn prop="compare" label="" width="70"/>
-          <ElTableColumn prop="remove" label="" width="20"/>
+          <ElTableColumn prop="compare" label="" width="70" className="clickable" />
+          <ElTableColumn prop="remove" label="" width="20" className="clickable" />
         </ElTable>
       </div>
     );

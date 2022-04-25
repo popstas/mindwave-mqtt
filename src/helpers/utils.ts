@@ -24,14 +24,14 @@ export function percentClass(str: string, type: string) {
   const store = useStore();
   const val = parseInt(str);
 
-  if (type === 'meditation70') {
+  if (type === 'meditation70' || type === 'med70') {
     if (val >= store.state.settings.meditationFrom) return 'percent-highest';
     if (val >= store.state.medLevels.high) return 'percent-high';
     if (val > store.state.medLevels.low) return 'percent-mid';
     if (val > 0) return 'percent-low';
   }
 
-  if (type === 'meditation') {
+  if (type === 'meditation' || type === 'med_avg') {
     if (val >= 80) return 'percent-bold-big';
     if (val >= 68) return 'percent-bold';
     // if (val > 60) return 'percent-mid';
