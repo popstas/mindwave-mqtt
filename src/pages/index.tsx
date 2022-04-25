@@ -83,8 +83,8 @@ export default defineComponent({
     // computed
     const thresholds = computed(() => {
       const thresholds = [70, 80, 90, 100];
-      if (!thresholds.includes(store.state.meditationFrom)) {
-        thresholds.push(parseInt(store.state.meditationFrom));
+      if (!thresholds.includes(store.state.settings.meditationFrom)) {
+        thresholds.push(parseInt(store.state.settings.meditationFrom));
         return thresholds.sort();
       }
       return thresholds;
@@ -93,7 +93,7 @@ export default defineComponent({
     const meditation = computed(() => mindwaveData.value.meditation);
     const attention = computed(() => mindwaveData.value.attention);
     const signal = computed(() => mindwaveData.value.signal);
-    const isSound = computed(() => store.state.isSound);
+    const isSound = computed(() => store.state.settings.isSound);
     const lastDataTime = computed(() => cur.value.lastDataTime);
 
     const days = computed(() => {
@@ -268,8 +268,8 @@ export default defineComponent({
       }
 
       // stop after max time
-      if (store.state.meditationTimeMax > 0 && 
-        cur.value.meditationTime >= store.state.meditationTimeMax
+      if (store.state.settings.meditationTimeMax > 0 &&
+        cur.value.meditationTime >= store.state.settings.meditationTimeMax
       ) {
         stopMeditation();
       }
@@ -417,13 +417,13 @@ export default defineComponent({
     function playSound() {
       if (cur.value.isPlay) return;
       cur.value.isPlay = true;
-      if (store.state.isSound) oscillator.connect(audioCtx.destination);
+      if (store.state.settings.isSound) oscillator.connect(audioCtx.destination);
     }
 
     function pause() {
       if (!cur.value.isPlay) return;
       cur.value.isPlay = false;
-      if (store.state.isSound) oscillator.disconnect(audioCtx.destination);
+      if (store.state.settings.isSound) oscillator.disconnect(audioCtx.destination);
     }
 
     function startMeditation() {

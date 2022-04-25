@@ -25,7 +25,7 @@ export function percentClass(str: string, type: string) {
   const val = parseInt(str);
 
   if (type === 'meditation70') {
-    if (val >= store.state.meditationFrom) return 'percent-highest';
+    if (val >= store.state.settings.meditationFrom) return 'percent-highest';
     if (val >= store.state.medLevels.high) return 'percent-high';
     if (val > store.state.medLevels.low) return 'percent-mid';
     if (val > 0) return 'percent-low';
