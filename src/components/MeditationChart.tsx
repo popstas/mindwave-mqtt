@@ -26,7 +26,7 @@ export default defineComponent({
     const meditationZones = computed(() => store.state.settings.meditationZones);
 
     watch([chartData, halfChartTop, halfChartBottom, meditationZones], (val) => {
-      // console.log('chartData: ', chartData);
+      // console.log('chartData: ', chartData.value);
       drawChartMeditation(props.id, chartData.value);
     });
 
@@ -65,7 +65,7 @@ export default defineComponent({
     function drawChartMeditation(svgId, chartData) {
       // console.log('svgId: ', svgId);
       // console.log('chartData: ', chartData);
-      if (chartData.length === 0) return;
+      // if (chartData.length === 0) return;
 
       const margin = { top: 20, right: 30, bottom: 30, left: 40 };
       // this.$refs[svgId].setAttribute('width', width); // TODO:

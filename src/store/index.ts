@@ -2,7 +2,7 @@ import { InjectionKey } from 'vue';
 import { createStore, Store } from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import { defaultState } from './defaultState';
-import { MeditationType, UserType, MeditationBriefType } from '@/helpers/types';
+import { MeditationType, UserType, MeditationBriefType, MeditationDataType } from '@/helpers/types';
 
 export interface State {
   settings: {
@@ -16,7 +16,9 @@ export interface State {
   },
 
   meditationsBrief: MeditationBriefType[],
-  meditationsData: {},
+  meditationsData: {
+    [key: number]: MeditationDataType[]
+  },
   meditations: MeditationType[],
 
   // not persistent
@@ -42,6 +44,7 @@ const persistentFields = [
   // 'fromDay',
   'settings',
   'meditations',
+  'meditationsData',
   'meditationsBrief',
 ];
 

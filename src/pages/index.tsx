@@ -10,7 +10,7 @@ import { ElButton } from 'element-plus';
 import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
-import { MeditationBriefType, ThresholdsDataType } from '@/helpers/types';
+import { MeditationBriefType, MeditationDataType, ThresholdsDataType } from '@/helpers/types';
 import { dbGet, dbRemove, dbSet } from '@/helpers/firebaseDb';
 
 interface NoSleepType {
@@ -55,7 +55,7 @@ export default defineComponent({
     const cur = ref({
       meditationStart: Date.now(),
       meditationTime: 0,
-      history: [],
+      history: [] as MeditationDataType[],
       thresholdsData: {} as ThresholdsDataType,
       name: '',
       tick: 0,
@@ -230,7 +230,7 @@ export default defineComponent({
       }
     }
 
-    function updateMeditation(val) {
+    function updateMeditation(val: number) {
       console.log(`watch meditation, tick: ${cur.value.tick}, val: `, val);
 
       // started meditation
@@ -485,16 +485,46 @@ export default defineComponent({
         // console.log('add meditation to store.state.meditations');
         store.commit('meditationsBrief', sorted);
         dbSet('meditations', sorted);
-        dbSet(`meditationsData/${med.startTime}`, cur.value.history);
+        setHistory(med.startTime, cur.value.history);
       } catch (e) {
         alert('Not enough space for save meditation!');
       }
     }
 
+    function getHistory(id: number) {
+      return new Promise((resolve, reject) => {
+        if (store.state.meditationsData[id]) return resolve(store.state.meditationsData[id]);
+        console.log("meditationsData cache size:", Object.keys(store.state.meditationsData).length);
+        dbGet(`meditationsData/${id}`, history => {
+          if (history) resolve(history/* as MeditationDataType[]*/);
+          else reject(history);
+        });
+      });
+    }
+    function setHistory(id: number, value: MeditationDataType[]) {
+      const newData = {
+        ...store.state.meditationsData,
+        ...{ [id]: value }
+      }
+      store.commit('meditationsData', newData);
+      dbSet(`meditationsData/${id}`, value);
+    }
+    function removeHistory(id: number) {
+      const newData = { ...store.state.meditationsData }
+      delete(newData[id]);
+      store.commit('meditationsData', newData);
+      dbRemove(`meditationsData/${id}`);
+    }
+
     function loadMeditation(med: MeditationBriefType) {
+      stopMeditation();
       // console.log('load meditation: ', med);
-      dbGet(`meditationsData/${med.startTime}`, history => {
+      getHistory(med.startTime).then(history => {
+        // console.log("history:", history);
         cur.value.history = history;
+      }).catch(() => {
+        console.log("error load history");
+        cur.value.history = [];
       });
       // cur.value.history = med.history;
       cur.value.thresholdsData = med.thresholdsData;
@@ -516,8 +546,8 @@ export default defineComponent({
     function removeMeditation(med: MeditationBriefType) {
       const removed = store.state.meditationsBrief.filter((m) => m.name !== med.name);
       store.commit('meditationsBrief', removed);
-      dbSet('meditations', removed)
-      dbRemove(`meditationsData/${med.startTime}`);
+      dbSet('meditations', removed);
+      removeHistory(med.startTime);
     }
 
     function addHistory() {
