@@ -1,5 +1,6 @@
 import { defineComponent, toRefs } from "vue";
 import { mmss, percentClass, timePercent } from '@/helpers/utils'
+import '@/styles/components/ValueStats.scss';
 
 export default defineComponent({
   name: "ValueStats",

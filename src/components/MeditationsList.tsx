@@ -2,6 +2,7 @@ import useStore from "@/helpers/useStore";
 import { computed, defineComponent } from "vue";
 import { ElTable, ElTableColumn } from "element-plus"
 import { dateTimeFormat, mmss, percentClass } from '@/helpers/utils';
+import '@/styles/components/MeditationList.scss';
 
 interface MedRowType {
   startTime: number,
@@ -78,7 +79,7 @@ export default defineComponent({
     });
 
     return () => (
-      <div class="meditations-list">
+      <div class="mt-4 mx-1">
         <h2>History</h2>
         <ElTable class="meditation-items"
           data={items.value}

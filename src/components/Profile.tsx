@@ -60,6 +60,7 @@ export default defineComponent({
 
       if (isChanged) {
         console.log("update settings:", settings);
+        store.commit('settings', settings);
         dbSet(settingsRef, settings);
       }
     }

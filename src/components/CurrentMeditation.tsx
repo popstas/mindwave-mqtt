@@ -4,6 +4,7 @@ import ValueStats from "@/components/ValueStats";
 import MeditationChart from "@/components/MeditationChart";
 import { mmss } from "@/helpers/utils";
 import { ElInput } from "element-plus"
+import styles from "@/styles/components/CurrentMeditation.module.scss";
 
 export default defineComponent({
   name: "CurrentMeditation",
@@ -30,24 +31,24 @@ export default defineComponent({
 
 
     return () => (
-      <div class="current-meditation">
-        <div class="main-values">
+      <div class={styles.currentMeditation}>
+        <div class={styles.mainValues}>
           { props.mindwaveData?.value.signal === 0 && props.mindwaveData?.value.meditation > 0 && (
-            <div class="main-value">
-              <span class="label">Meditation:</span>
-              <span class="value">{ props.mindwaveData?.value.meditation }</span>
+            <div class={styles.mainValue}>
+              <span class={styles.label}>Meditation:</span>
+              <span class={styles.value}>{ props.mindwaveData?.value.meditation }</span>
             </div>
           )}
           { props.mindwaveData?.value.signal === 0 && props.mindwaveData?.value.attention > 0 && (
-            <div class="main-value">
-              <span class="label">Attention:</span>
-              <span class="value">{ props.mindwaveData?.value.attention }</span>
+            <div class={styles.mainValue}>
+              <span class={styles.label}>Attention:</span>
+              <span class={styles.value}>{ props.mindwaveData?.value.attention }</span>
             </div>
           )}
           { props.mindwaveData?.value.signal > 0 && (
-            <div class="main-value">
-              <span class="label">Signal loses:</span>
-              <span class="value">{ Math.min(props.mindwaveData?.value.signal, 100) }</span>
+            <div class={styles.mainValue}>
+              <span class={styles.label}>Signal loses:</span>
+              <span class={styles.value}>{ Math.min(props.mindwaveData?.value.signal, 100) }</span>
             </div>
           )}
         </div>
@@ -77,7 +78,7 @@ export default defineComponent({
           <MeditationChart id={props.id} med={props.cur} />
         </div>
 
-        <div><ElInput
+        <div class="mt-2"><ElInput
           class="meditation-name"
           v-model={cur.value.name}
           placeholder="Name"

@@ -697,11 +697,12 @@ export default defineComponent({
           <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}/>
         )}
 
-        <ElButton onClick={startMeditation}>{cur.value.state === 'started' ? 'Stop' : 'Start'}</ElButton>
-        {cur.value.state === 'stop' && <ElButton onClick={saveMeditation}>Save</ElButton>}
+        <div class="mb-4">
+          <ElButton onClick={startMeditation}>{cur.value.state === 'started' ? 'Stop' : 'Start'}</ElButton>
+          {cur.value.state === 'stop' && <ElButton onClick={saveMeditation}>Save</ElButton>}
+          {store.state.user && <ElButton onClick={syncMeditations}>Sync</ElButton>}
+        </div>
 
-        {store.state.user && <ElButton onClick={syncMeditations}>Sync</ElButton>}
-        {store.state.user && <ElButton onClick={syncMeditationsForce}>Force sync</ElButton>}
 
         <Settings/>
 
@@ -714,7 +715,8 @@ export default defineComponent({
         />
         <DaysList days={days}/>
         {/*<ElButton onClick={convertMeditations}>Convert med</ElButton>
-        <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>*/}
+        <ElButton onClick={sendMeditationsData}>Send to DB</ElButton>
+        {store.state.user && <ElButton onClick={syncMeditationsForce}>Force sync</ElButton>}*/}
       </div>
     );
   },

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 body {
   background: #333;
   color: #ccc;
@@ -34,14 +16,14 @@ h2 {
 a {
   color: #ccc;
   text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
 }
-a:hover {
-  text-decoration: underline;
-}
+
 
 form {
   margin-top: 15px;
-  /* margin-bottom: 30px; */
 }
 
 input {
@@ -49,62 +31,18 @@ input {
   color: #ccc;
 }
 
+.el-button {
+  cursor: pointer;
+  &:hover {
+    color: #ffff00;
+  }
+}
+
 .meditation-name input{
   text-align: center;
   border: none;
   padding: 3px;
   width: 60%; // TODO: fix on mobile
-}
-
-.main-value {
-  font-size: 20px;
-  /* margin-bottom: 30px; */
-
-}
-.main-value .label {
-  margin-bottom: -40px;
-  display: block;
-}
-/* @media(max-width: 800px) {
-  .main-value .label {
-    margin-bottom: -15px;
-  }
-} */
-.main-value .label {
-  margin-bottom: -40px;
-  display: block;
-}
-.main-value .value {
-  display: block;
-  font-size: 30vh;
-}
-@media (min-width: 800px) {
-  .main-value {
-    float: left;
-    width: 50%;
-  }
-}
-/* Mobile */
-@media (orientation: portrait) {
-  .main-value {
-    float: left;
-    width: 50%;
-  }
-  .main-value .label {
-    margin-bottom: -20px;
-  }
-  .main-value .value {
-    font-size: 15vh;
-  }
-}
-/* 4k */
-@media (min-width: 3500px) {
-  .main-value .label {
-    font-size: 3vh;
-  }
-  .main-value .value {
-    font-size: 30vh;
-  }
 }
 
 button {
@@ -124,9 +62,6 @@ table {
   text-align: center;
   margin-top: 10px;
 }
-/*#app:not(.inited) {
-  display: none;
-}*/
 
 .poor-signal {
   opacity: 0.5;
@@ -140,67 +75,6 @@ svg {
   max-width: 100%;
 }
 
-/* Stats */
-.stats-row {
-  margin-bottom: 15px;
-}
-.stats-value .percent {
-  display: inline-block;
-  min-width: 45px;
-}
-/* desktop */
-@media (min-width: 800px) {
-  .stats-row {
-    float: left;
-    width: 50%;
-  }
-}
-/* 4k */
-@media (min-width: 3500px) {
-  .stats-row {
-    font-size: 3vh;
-  }
-}
-/* Mobile 360 */
-@media (max-width: 360px) {
-  .stats-row {
-    font-size: 12px;
-  }
-}
-
-/* History */
-.meditations-list {
-  text-align: left;
-  margin-bottom: 15px;
-  line-height: 1.5em;
-}
-.meditation-items tr:hover {
-  background: #444;
-}
-.meditation-items td {
-  vertical-align: top;
-  padding-bottom: 10px;
-}
-.med__date {
-  padding-right: 10px;
-  min-width: 130px;
-}
-.med__date_today {
-  font-weight: bold;
-}
-.med__name {
-}
-.med__time {
-  text-align: right;
-}
-.med__remove {
-  color: #999;
-}
-.med__time,
-.med__med,
-.med__att {
-  padding: 0 10px;
-}
 
 .percent-low { color: #ff0000; }
 .percent-mid { color: #ffff00; }
@@ -209,9 +83,6 @@ svg {
 .percent-bold { text-shadow: 1px 1px 0px #fff; }
 .percent-bold-big { text-shadow: 1px 1px 0px #fff; font-size: 1.2rem; }
 
-.meditation-days { text-align: center; line-height: 1.5em; }
-
-.main-values::after { display: block; content: ''; clear: both; }
 .stats-attention { display: none; }
 
 
@@ -234,8 +105,20 @@ svg {
 
 /* Settings component */
 .settings {
-  max-width: 480px;
+  max-width: 360px;
   margin: 0 auto;
+
+  .el-form-item__label {
+    display: inline-block;
+    margin-right: 10px;
+  }
+  .el-form-item__content {
+    display: inline-block;
+  }
+  .el-input__inner {
+    width: 105px;
+    padding: 2px 3px;
+  }
 }
 
 .clickable {

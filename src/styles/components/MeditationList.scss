@@ -1,0 +1,28 @@
+/* History */
+.meditation-items tr:hover {
+  background: #444;
+}
+.meditation-items td {
+  vertical-align: top;
+  padding-bottom: 10px;
+}
+.med__date {
+  padding-right: 10px;
+  min-width: 130px;
+}
+.med__date_today {
+  font-weight: bold;
+}
+.med__name {
+}
+.med__time {
+  text-align: right;
+}
+.med__remove {
+  color: #999;
+}
+.med__time,
+.med__med,
+.med__att {
+  padding: 0 10px;
+}

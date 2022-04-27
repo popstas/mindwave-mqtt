@@ -1,0 +1,39 @@
+.currentMeditation {
+  @apply mb-4;
+}
+
+.mainValues::after { display: block; content: ''; clear: both; }
+
+.mainValue {
+  font-size: 20px;
+
+  @media (min-width: 800px) {
+    @apply float-left w-1/2;
+  }
+
+  @media (orientation: portrait) {
+    @apply float-left w-1/2;
+  }
+}
+
+.label {
+  margin-bottom: -40px;
+  display: block;
+  @media (orientation: portrait) {
+    margin-bottom: -20px;
+  }
+  @media (min-width: 3500px) {
+    font-size: 3vh;
+  }
+}
+
+.value {
+  display: block;
+  font-size: 30vh;
+  @media (orientation: portrait) {
+    font-size: 15vh;
+  }
+  @media (min-width: 3500px) {
+    font-size: 30vh;
+  }
+}
