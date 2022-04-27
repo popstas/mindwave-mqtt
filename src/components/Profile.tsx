@@ -118,7 +118,7 @@ export default defineComponent({
     });
 
     return () => (
-      <div class="profile">
+      <div class="profile clickable">
         { user.value?.email && (
           <a class="profile-logout" title="Click to logout" onClick={logout} href="#">{ user.value.email }</a>
         )}

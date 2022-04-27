@@ -231,7 +231,7 @@ export default defineComponent({
     }
 
     function updateMeditation(val: number) {
-      console.log(`watch meditation, tick: ${cur.value.tick}, val: `, val);
+      // console.log(`watch meditation, tick: ${cur.value.tick}, val: `, val);
 
       // started meditation
       if (!cur.value.meditationStart || cur.value.state === 'stop') return;
@@ -332,10 +332,45 @@ export default defineComponent({
 
     // TODO: on app load
     function syncMeditations() {
-      dbGet('meditations', meds => {
-        console.log('Update meditations from firebase:', meds);
-        store.commit('meditationsBrief', meds);
+      dbGet('meditations', (meds) => {
+        // new from firebase
+        const newMeds = meds.filter(med => {
+          return !store.state.meditationsBrief.find(el => el.startTime === med.startTime);
+        });
+
+        if (newMeds.length > 0) {
+          console.log('Update meditations from firebase:', newMeds);
+          const synced = sortMediations([...store.state.meditationsBrief, ...newMeds])
+          store.commit('meditationsBrief', synced);
+        }
+
+        const unsyncedHistory = Object
+          .entries(store.state.meditationsData)
+          .filter(en => !en[1].synced)
+          .map(en => {
+            console.log("en:", en);
+            return {
+              id: parseInt(en[0]),
+              data: en[1].data
+            }
+          });
+        if (unsyncedHistory.length > 0) {
+          console.log("send meds:", unsyncedHistory);
+          const cached = {...store.state.meditationsData};
+          for (const item of unsyncedHistory) {
+            setHistory(item.id, item.data);
+            cached[item.id].synced = true;
+          }
+          store.commit('meditationsData', cached);
+          dbSet('meditations', store.state.meditationsBrief);
+        }
       });
+    }
+
+    function syncMeditationsForce() {
+      store.state.meditationsBrief = [];
+      store.state.meditationsData = {};
+      syncMeditations();
     }
 
     // TODO: remove
@@ -357,6 +392,9 @@ export default defineComponent({
     }*/
 
     onMounted(() => {
+      console.log("meditationsData cache size:", Object.keys(store.state.meditationsData).length);
+      console.log("meditationsData unsynced:", Object.entries(store.state.meditationsData).filter(e => !e[1].synced).length);
+
       // update mindwaveData
       setInterval(updateMindwaveData, 1000);
 
@@ -476,25 +514,30 @@ export default defineComponent({
 
       console.log('med: ', med);
       const meds = [...store.state.meditationsBrief, med];
-      const sorted = meds.sort((b, a) => {
-        if (a.startTime > b.startTime) return 1;
-        if (a.startTime < b.startTime) return -1;
-        return 0;
-      });
+      const sorted = sortMediations(meds);
       try {
         // console.log('add meditation to store.state.meditations');
         store.commit('meditationsBrief', sorted);
-        dbSet('meditations', sorted);
+        dbSet('meditations', sorted).catch(() => {
+          console.log("meditations not uploaded");
+        });
         setHistory(med.startTime, cur.value.history);
       } catch (e) {
         alert('Not enough space for save meditation!');
       }
     }
 
+    function sortMediations(meds: MeditationBriefType[]) {
+      return meds.sort((b, a) => {
+        if (a.startTime > b.startTime) return 1;
+        if (a.startTime < b.startTime) return -1;
+        return 0;
+      });
+    }
+
     function getHistory(id: number) {
       return new Promise((resolve, reject) => {
-        if (store.state.meditationsData[id]) return resolve(store.state.meditationsData[id]);
-        console.log("meditationsData cache size:", Object.keys(store.state.meditationsData).length);
+        if (store.state.meditationsData[id]) return resolve(store.state.meditationsData[id].data);
         dbGet(`meditationsData/${id}`, history => {
           if (history) resolve(history/* as MeditationDataType[]*/);
           else reject(history);
@@ -504,16 +547,29 @@ export default defineComponent({
     function setHistory(id: number, value: MeditationDataType[]) {
       const newData = {
         ...store.state.meditationsData,
-        ...{ [id]: value }
+        ...{ [id]: {
+          synced: false,
+          data:value
+        } }
       }
       store.commit('meditationsData', newData);
-      dbSet(`meditationsData/${id}`, value);
+      dbSet(`meditationsData/${id}`, value)
+        .then(() => {
+          const syncedData = {...store.state.meditationsData};
+          syncedData[id].synced = true;
+          store.commit('meditationsData', syncedData);
+          console.log("synced");
+          // removeHistory(id, true);
+        })
+        .catch(() => {
+          console.log("history not synced");
+        });
     }
-    function removeHistory(id: number) {
+    function removeHistory(id: number, onlyCached=false) {
       const newData = { ...store.state.meditationsData }
       delete(newData[id]);
       store.commit('meditationsData', newData);
-      dbRemove(`meditationsData/${id}`);
+      if (!onlyCached) dbRemove(`meditationsData/${id}`);
     }
 
     function loadMeditation(med: MeditationBriefType) {
@@ -644,7 +700,8 @@ export default defineComponent({
         <ElButton onClick={startMeditation}>{cur.value.state === 'started' ? 'Stop' : 'Start'}</ElButton>
         {cur.value.state === 'stop' && <ElButton onClick={saveMeditation}>Save</ElButton>}
 
-        <ElButton onClick={syncMeditations}>From DB</ElButton>
+        {store.state.user && <ElButton onClick={syncMeditations}>Sync</ElButton>}
+        {store.state.user && <ElButton onClick={syncMeditationsForce}>Force sync</ElButton>}
 
         <Settings/>
 

@@ -22,14 +22,16 @@ export function dbGet(path: string, onData: (data?: {}, dbRef?: DatabaseReferenc
 }
 
 export function dbSet(path: string | DatabaseReference, data: {}) {
-  if (!store.state.user) {
-    return undefined;
-  }
+  return new Promise((resolve, reject) => {
+    if (!store.state.user) {
+      return reject();
+    }
 
-  const dbRef = typeof path === 'string' ?
-    ref(db, `users/${store.state.user.uid}/${path}`) :
-    path;
-  return set(dbRef, data);
+    const dbRef = typeof path === 'string' ?
+      ref(db, `users/${store.state.user.uid}/${path}`) :
+      path;
+    return set(dbRef, data);
+  });
 }
 
 export function dbRemove(path: string | DatabaseReference) {

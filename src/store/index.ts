@@ -17,7 +17,10 @@ export interface State {
 
   meditationsBrief: MeditationBriefType[],
   meditationsData: {
-    [key: number]: MeditationDataType[]
+    [key: number]: {
+      synced: boolean,
+      data: MeditationDataType[]
+    }
   },
   meditations: MeditationType[],
 
