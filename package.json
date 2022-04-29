@@ -36,7 +36,6 @@
     "firebase": "^9.6.3",
     "firebaseui": "^6.0.0",
     "mqtt": "^4.2.6",
-    "node-hide-console-window": "^2.1.0",
     "node-thinkgear-sockets": "0.0.1",
     "nosleep.js": "^0.12.0",
     "open": "^8.4.0",
@@ -45,6 +44,9 @@
     "vue-router": "^4.0.12",
     "vuex": "^4.0.2",
     "vuex-persistedstate": "^4.1.0"
+  },
+  "optionalDependencies": {
+    "node-hide-console-window": "^2.1.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.21.0",
