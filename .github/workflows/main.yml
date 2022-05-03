@@ -6,13 +6,15 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
+      - name: Prepare
+        run: yarn ci
       - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      - name: Prepare
-        run: yarn ci
       - name: Lint
         run: yarn lint
       - name: Typecheck
