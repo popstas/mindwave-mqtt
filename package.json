@@ -8,6 +8,7 @@
     "dev": "vite --port 9302 --host",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx,vue}\"",
     "typecheck": "tsc --noEmit",
+    "ci": "rm -rf node_modules && yarn install --frozen-lockfile",
     "build": "vue-tsc --noEmit && vite build",
     "build-dev": "vite build --base=/dist",
     "build-pkg": "pkg . --out-path dist",
