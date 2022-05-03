@@ -5,9 +5,8 @@ import CurrentMeditation from '@/components/CurrentMeditation';
 import MeditationsList from '@/components/MeditationsList';
 import DaysList from '@/components/DaysList';
 import NoSleep from 'nosleep.js';
-import { mmss } from '@/helpers/utils';
+import { mmss, dayFormat } from '@/helpers/utils';
 import { ElButton } from 'element-plus';
-import { dayFormat } from "@/helpers/utils";
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
 import { MeditationBriefType, MeditationDataType, ThresholdsDataType } from '@/helpers/types';
@@ -29,8 +28,6 @@ export default defineComponent({
       enable: () => new Promise(()=>{}),
       disable: () => {},
     }
-    // console.log('store:', store);
-    // console.log('props:', props);
 
     // sound
     let audioCtx: AudioContext; // should be inited later, not here
