@@ -23,8 +23,8 @@ export default defineComponent({
             <td class="value">
               <span>{ mmss(th.total) }</span>&nbsp;
               { th.total > 0 && (
-                <span class={'percent ' + percentClass(timePercent(th.total, cur.value?.meditationTime), `${name.value}${val}`)}>
-                  ({ timePercent(th.total, cur.value?.meditationTime) })
+                <span class={'percent ' + percentClass(timePercent(th.total, cur.value?.durationTime), `${name.value}${val}`)}>
+                  ({ timePercent(th.total, cur.value?.durationTime) })
                 </span>
               )}
               { th.maxTime && ( <span class="max" >, max: { mmss(th.maxTime) }</span> ) }

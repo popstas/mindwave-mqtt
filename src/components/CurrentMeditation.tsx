@@ -67,10 +67,10 @@ export default defineComponent({
               stats={cur.value?.thresholdsData?.attention}
             />
 
-            { cur.value?.meditationTime > 0 && (
+            { cur.value?.durationTime > 0 && (
               <div class="meditation-time">
                 <span class="label">Session time:</span>
-                <span class="value">{ mmss(cur.value.meditationTime) }</span>
+                <span class="value">{ mmss(cur.value.durationTime) }</span>
               </div>
             )}
 

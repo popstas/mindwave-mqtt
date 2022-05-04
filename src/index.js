@@ -115,7 +115,8 @@ function createViteExpress() {
   })
 }
 
-/*async function createViteServerNoSSR(
+// TODO: write working no ssr vite dev
+async function createViteServerNoSSR(
   app = null,
   root = process.cwd(),
   isProd = process.env.NODE_ENV === 'production'
@@ -135,8 +136,13 @@ function createViteExpress() {
   })
   // use vite's connect instance as middleware
   app.use(vite.middlewares);
+
+  app.use('*', async (req, res) => {
+    // serve index.html - we will tackle this next
+  });
+
   return { app, vite }
-}*/
+}
 
 // https://vitejs.dev/guide/ssr.html#setting-up-the-dev-server
 async function createViteServerSSR(

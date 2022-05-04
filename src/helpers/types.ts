@@ -1,19 +1,16 @@
-// export interface MeditationType {
-//   meditationStart: number;
-//   meditationTime: number;
-//   history: Meditation[];
-// }
+export interface RuntimeType {
+}
 
 export interface MeditationType {
   name: string,
-  meditationStart: number,
-  meditationTime: number,
+  startTime: number,
+  durationTime: number,
+  thresholdsData: ThresholdsDataType,
   history: MeditationDataType[],
-  thresholdsData: {},
-  tick: number,
-  totalSum: number,
 
-  meditationCompare: {},
+  tick?: number,
+  totalSum?: number,
+
   state: string,
   isPlay: boolean, // TODO: to store
   lastDataTime: number,

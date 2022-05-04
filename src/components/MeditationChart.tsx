@@ -43,10 +43,10 @@ export default defineComponent({
 
         const isMed = m >= store.state.settings.meditationFrom ? 100 : 0;
 
-        const seconds = Math.round((date - med.value.meditationStart) / 1000);
+        const seconds = Math.round((date - med.value.startTime) / 1000);
 
         return {
-          date: date - med.value.meditationStart,
+          date: date - med.value.startTime,
           value: m,
           meditation: m,
           isMeditationHigh: isMed,

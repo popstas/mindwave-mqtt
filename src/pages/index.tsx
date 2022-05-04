@@ -9,7 +9,7 @@ import { mmss, dayFormat } from '@/helpers/utils';
 import { ElButton } from 'element-plus';
 import DaysChart from '@/components/DaysChart';
 import Profile from '@/components/Profile';
-import { MeditationBriefType, MeditationDataType, ThresholdsDataType } from '@/helpers/types';
+import { MeditationBriefType, MeditationDataType, MeditationType, ThresholdsDataType } from '@/helpers/types';
 import { dbGet, dbRemove, dbSet } from '@/helpers/firebaseDb';
 
 interface NoSleepType {
@@ -50,19 +50,20 @@ export default defineComponent({
 
     // TODO: define type
     const cur = ref({
-      meditationStart: Date.now(),
-      meditationTime: 0,
+      startTime: Date.now(),
+      durationTime: 0,
       history: [] as MeditationDataType[],
       thresholdsData: {} as ThresholdsDataType,
       name: '',
       tick: 0,
       totalSum: 0,
 
-      meditationCompare: false,
       state: 'idle',
       isPlay: false,
       lastDataTime: 0,
-    });
+    } as MeditationType);
+
+    const medCompare = ref({} as MeditationType);
 
     // TODO: define type
     const mindwaveData = ref({
@@ -231,12 +232,12 @@ export default defineComponent({
       // console.log(`watch meditation, tick: ${cur.value.tick}, val: `, val);
 
       // started meditation
-      if (!cur.value.meditationStart || cur.value.state === 'stop') return;
+      if (!cur.value.startTime || cur.value.state === 'stop') return;
 
       processThresholds({ field: 'meditation', value: val });
 
       // время сессии
-      cur.value.meditationTime = Math.round((Date.now() - cur.value.meditationStart) / 1000);
+      cur.value.durationTime = Math.round((Date.now() - cur.value.startTime) / 1000);
 
       // среднее, только при хорошем сигнале
       // здесь по идее всегда сигнал 0
@@ -266,7 +267,7 @@ export default defineComponent({
 
       // first signal, actually begin
       if (cur.value.tick === 1) {
-        cur.value.meditationStart = Date.now();
+        cur.value.startTime = Date.now();
 
         // begin signal
         beep(freq);
@@ -274,7 +275,7 @@ export default defineComponent({
 
       // stop after max time
       if (store.state.settings.meditationTimeMax > 0 &&
-        cur.value.meditationTime >= store.state.settings.meditationTimeMax
+        cur.value.durationTime >= store.state.settings.meditationTimeMax
       ) {
         stopMeditation();
       }
@@ -287,7 +288,7 @@ export default defineComponent({
     });
 
     watch(attention, (val, prev) => {
-      if (!cur.value.meditationStart || cur.value.state === 'stop') return;
+      if (!cur.value.startTime || cur.value.state === 'stop') return;
       processThresholds({ field: 'attention', value: val });
     });
 
@@ -321,8 +322,8 @@ export default defineComponent({
     /*function meditationBrief(med: MeditationType) {
       return {
         name: med.name,
-        startTime: med.meditationStart,
-        durationTime: med.meditationTime,
+        startTime: med.startTime,
+        durationTime: med.durationTime,
         thresholdsData: med.thresholdsData,
       } as MeditationBriefType
     }*/
@@ -383,7 +384,7 @@ export default defineComponent({
     /*function sendMeditationsData() {
       const data = {};
       for (const med of store.state.meditations) {
-        data[med.meditationStart] = med.history;
+        data[med.startTime] = med.history;
       }
       dbSet('meditationsData', data);
     }*/
@@ -478,7 +479,7 @@ export default defineComponent({
 
       // start
       cur.value.state = 'started';
-      cur.value.meditationStart = Date.now();
+      cur.value.startTime = Date.now();
       cur.value.history = [];
       cur.value.thresholdsData = {} as ThresholdsDataType;
       cur.value.tick = 0;
@@ -488,8 +489,8 @@ export default defineComponent({
     }
 
     function stopMeditation() {
-      // this.meditationStart = 0;
-      // this.meditationTime = 0;
+      // this.startTime = 0;
+      // this.durationTime = 0;
 
       beep(0);
       setTimeout(pause, 2000);
@@ -499,13 +500,13 @@ export default defineComponent({
     }
 
     function saveMeditation() {
-      const d = new Date(cur.value.meditationStart).toISOString().replace('T', ' ').substring(0, 16);
-      const name = cur.value.name || `${d}: ${mmss(cur.value.meditationTime)}`;
+      const d = new Date(cur.value.startTime).toISOString().replace('T', ' ').substring(0, 16);
+      const name = cur.value.name || `${d}: ${mmss(cur.value.durationTime)}`;
       const med: MeditationBriefType = {
         name: name,
         // history: cur.value.history, // слишком тяжёлые данные, надо сохранять отдельно
-        startTime: cur.value.meditationStart,
-        durationTime: cur.value.meditationTime,
+        startTime: cur.value.startTime,
+        durationTime: cur.value.durationTime,
         thresholdsData: cur.value.thresholdsData,
       };
 
@@ -581,17 +582,26 @@ export default defineComponent({
       });
       // cur.value.history = med.history;
       cur.value.thresholdsData = med.thresholdsData;
-      cur.value.meditationStart = med.startTime;
-      cur.value.meditationTime = med.durationTime;
+      cur.value.startTime = med.startTime;
+      cur.value.durationTime = med.durationTime;
       cur.value.name = med.name;
       drawChart();
       window.scrollTo(0, 0);
     }
 
     function compareMeditation(med: MeditationBriefType) {
-      if (med.name === cur.value.meditationCompare.name) cur.value.meditationCompare = {};
+      if (med.name === medCompare.value.name) medCompare.value = {};
       else {
-        cur.value.meditationCompare = med;
+        medCompare.value = {
+          ...med,
+          ...{
+
+          }
+        };
+        getHistory(med.startTime).then(history => {
+          // console.log("history:", history);
+          medCompare.value.history = history as MeditationType;
+        })
         window.scrollTo(0, 0);
       }
     }
@@ -690,8 +700,8 @@ export default defineComponent({
         <Profile/>
 
         <CurrentMeditation id="medCurrent" cur={cur} mindwaveData={mindwaveData}/>
-        { cur.value.meditationCompare.name && (
-          <CurrentMeditation id="medCompare" cur={cur.value.meditationCompare}/>
+        { medCompare.value.name && (
+          <CurrentMeditation id="medCompare" cur={medCompare.value}/>
         )}
 
         <div class="mb-4">

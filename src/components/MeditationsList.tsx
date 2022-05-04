@@ -62,7 +62,7 @@ export default defineComponent({
       return store.state.meditationsBrief?.map(med => {
         return {
           startTime: med.startTime,
-          date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.meditationStart < 86400000
+          date: dateTimeFormat(med.startTime), // TODO: med__date_today: Date.now() - med.startTime < 86400000
           name: med.name,
           time: mmss(med.durationTime),
           med70: Math.round(med.thresholdsData.meditation.thresholds[70].total / med.durationTime * 100),
